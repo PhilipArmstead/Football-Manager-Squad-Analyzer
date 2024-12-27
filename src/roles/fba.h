@@ -1,16 +1,16 @@
 #pragma once
 
-unsigned char insideForwardAttack[54] = {
-	0, // Cro
-	3, // Dri
-	3, // Fin
+unsigned char fullBackAttack[54] = {
+	3, // Cro
+	1, // Dri
+	0, // Fin
 	0, // Hea
-	1, // Lon
-	0, // Mar
-	4, // OtB
+	0, // Lon
+	3, // Mar
+	1, // OtB
 	1, // Pas
 	0, // Pen
-	0, // Tackling
+	3, // Tackling
 	0, // Vis
 	0, // Han
 	0, // Aer
@@ -19,17 +19,17 @@ unsigned char insideForwardAttack[54] = {
 	0, // Kic
 	0, // Throwing
 	3, // Ant
-	0, // Dec
+	1, // Dec
 	0, // 1v1
-	0, // Pos
+	3, // Pos
 	0, // Ref
-	3, // Fir
-	3, // Tec
+	1, // Fir
+	1, // Tec
 	0, // Left foot
 	0, // Right foot
-	1, // Fla
+	0, // Fla
 	0, // Cor
-	0, // Teamwork
+	3, // Teamwork
 	5, // Work Rate
 	0, // Long throws
 	0, // Eccentricity
@@ -43,16 +43,16 @@ unsigned char insideForwardAttack[54] = {
 	0, // Jum
 	0, // Ldr
 	0, // Dirtiness
-	1, // Bal
+	0, // Bal
 	0, // Bra
 	0, // Consistency
 	0, // Agg
-	3, // Agi
+	1, // Agi
 	0, // Important Matches
 	0, // Injury Proneness
 	0, // Versatility
 	0, // Natural Fitness
 	0, // Det
-	1, // Cmp
-	0, // Cnt
+	0, // Cmp
+	1, // Cnt
 };

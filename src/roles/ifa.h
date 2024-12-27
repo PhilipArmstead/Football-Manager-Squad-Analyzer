@@ -1,24 +1,24 @@
 #pragma once
 
-unsigned char insideForwardSupport[54] = {
+unsigned char insideForwardAttack[54] = {
 	0, // Cro
 	3, // Dri
 	3, // Fin
 	0, // Hea
 	1, // Lon
 	0, // Mar
-	3, // OtB
+	4, // OtB
 	1, // Pas
 	0, // Pen
 	0, // Tackling
-	1, // Vis
+	0, // Vis
 	0, // Han
 	0, // Aer
 	0, // Cmd
 	0, // Communication
 	0, // Kic
 	0, // Throwing
-	1, // Ant
+	3, // Ant
 	0, // Dec
 	0, // 1v1
 	0, // Pos
