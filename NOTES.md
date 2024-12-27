@@ -23,3 +23,11 @@
 - 0 = base
 - +0x0C = Random ID
 - +0x10 = UID
+- +0x78 = Adaptability
+- +0x79 = Ambition
+- +0x7A = Loyalty
+- +0x7B = Pressure
+- +0x7C = Professionalism
+- +0x7D = Sportsmanship
+- +0x7E = Temperament
+- +0x7F = Controversy
