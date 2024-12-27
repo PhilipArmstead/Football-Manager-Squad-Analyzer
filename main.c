@@ -7,17 +7,12 @@
 
 #include "weights.h"
 
+
 void printPlayer(int fd, long address);
 
 float calculateRoleScores(const unsigned char attributes[54], const unsigned char weights[54]);
 
-static inline long hexBytesToInt(const unsigned char *bytes, const char length) {
-	long value = 0;
-	for (short i = 0; i < length; ++i) {
-		value += (long) (bytes[i] * pow(256, i));
-	}
-	return value;
-}
+static inline long hexBytesToInt(const unsigned char *bytes, char length);
 
 static inline void resetAttributes(const int fd, const long address) {
 	const char max = 100;
@@ -56,11 +51,11 @@ static inline void writeToMemory(const int fd, const long address, const int len
 
 int main() {
 	/**
-	For scanning
-					For each line in /proc/id/maps...
-					e.g.
-					00010000-00012000 r--s 00000000 00:29 824407
-					build array of start/end addresses (10000, 12000)
+		For scanning
+		For each line in /proc/id/maps...
+		e.g.
+		00010000-00012000 r--s 00000000 00:29 824407
+		build array of start/end addresses (10000, 12000)
 	*/
 
 	char path[64];
@@ -102,7 +97,8 @@ int main() {
 	// scanf("%d", &input);
 	// unsigned char value = input;
 
-	// writeToMemory(fileDescriptorMemory, memoryLocationAttributes + offset, 1, &value);
+	// writeToMemory(fileDescriptorMemory, memoryLocationAttributes + offset, 1,
+	// &value);
 	// }
 
 	printPlayer(fileDescriptorMemory, memoryLocationAttributes);
@@ -129,16 +125,19 @@ void printPlayer(const int fd, const long address) {
 	unsigned char positions[15];
 	readFromMemory(fd, address - 0x70, 15, positions);
 
-	const bool canDevelopQuickly = attributes[48] < 70 && bytes[1] > 10 && bytes[4] > 10 && attributes[51] > 50;
+	const bool canDevelopQuickly = attributes[48] < 70 && bytes[1] > 10 &&
+																bytes[4] > 10 && attributes[51] > 50;
 	// TODO: depends on age
 	const bool isHotProspect = 0;
 	char *fastLearnerString = canDevelopQuickly ? "Fast learner  " : "";
 	char *hotProspectString = isHotProspect ? "Hot prospect  " : "";
 
-	printf(".------------------------------------------.------------------------------------------.\n");
+	printf(".------------------------------------------.-------------------------"
+		"-----------------.\n");
 	printf("| %ld (GK, DL/R, ST)          %s%s\n", hexBytesToInt(id, 4), fastLearnerString, hotProspectString);
 	printf("| Ability: %d/%d\n", ability[0], ability[2]);
-	printf(".------------------------------------------.------------------------------------------.\n");
+	printf(".------------------------------------------.-------------------------"
+		"-----------------.\n");
 
 	printf("| Adaptability:  ");
 	padLeft(bytes[0]);
@@ -170,11 +169,12 @@ void printPlayer(const int fd, const long address) {
 	padLeft(attributes[47]);
 
 	printf("\n");
-	printf(".------------------------------------------.------------------------------------------.\n");
+	printf(".------------------------------------------.-------------------------"
+		"-----------------.\n");
 	// Age
 	// Positions
 
-	for (char i = 0; i < 9; ++i) {
+	for (char i = 0; i < 12; ++i) {
 		const short familiarity = positions[roles[i].positionIndex];
 		if (familiarity >= 10) {
 			double raw = calculateRoleScores(attributes, *roles[i].weights);
@@ -193,4 +193,12 @@ float calculateRoleScores(const unsigned char attributes[54], const unsigned cha
 	}
 
 	return totalWeight ? totalScore / totalWeight : 0;
+}
+
+static inline long hexBytesToInt(const unsigned char *bytes, const char length) {
+	long value = 0;
+	for (short i = 0; i < length; ++i) {
+		value += (long) (bytes[i] * pow(256, i));
+	}
+	return value;
 }
