@@ -174,7 +174,7 @@ void printPlayer(const int fd, const long address) {
 	// Age
 	// Positions
 
-	for (char i = 0; i < 5; ++i) {
+	for (char i = 0; i < 9; ++i) {
 		const short familiarity = positions[roles[i].positionIndex];
 		if (familiarity >= 10) {
 			double raw = calculateRoleScores(attributes, *roles[i].weights);
