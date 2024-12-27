@@ -1,0 +1,25 @@
+# Notes
+
+## Mapping attributes
+
+- -0x78 = CA
+- -0x76 = PA
+- -0x70 = position start (GK)
+- -0x6F = Libero (unused?)
+- -0x6E = DL
+- -0x6D = DC
+- -0x6C = DR
+- -0x6B = DM
+- -0x6A = ML
+- -0x69 = MC
+- -0x68 = MR
+- -0x67 = AML
+- -0x66 = AMC
+- -0x65 = AMR
+- -0x64 = ST
+- -0x63 = WBL
+- -0x62 = WBR
+- -0x61 = attribute start?
+- 0 = base
+- +0x0C = Random ID
+- +0x10 = UID
