@@ -1,11 +1,11 @@
 #include <fcntl.h>
-#include <math.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 
 #include "weights.h"
+
+typedef unsigned char bool;
 
 
 void printPlayer(int fd, long address);
@@ -193,6 +193,12 @@ float calculateRoleScores(const unsigned char attributes[54], const unsigned cha
 	}
 
 	return totalWeight ? totalScore / totalWeight : 0;
+}
+
+static inline int pow(int base, int exp) {
+	int result = 1;
+	while (exp--) result *= base;
+	return result;
 }
 
 static inline long hexBytesToInt(const unsigned char *bytes, const char length) {
