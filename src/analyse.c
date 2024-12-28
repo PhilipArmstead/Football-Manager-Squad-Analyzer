@@ -14,17 +14,20 @@ static inline void padLeft(const unsigned char byte) {
 	printf("%d", byte);
 }
 
-void printPlayer(const int fd, const long address) {
-	unsigned char id[4];
-	readFromMemory(fd, address + 0x0C, 4, id);
+unsigned long printPlayer(Context *ctx) {
+	openMemory(ctx);
+
+	unsigned char idString[4];
+	readFromMemory(ctx->fd, ctx->attributeBase + 0x0C, 4, idString);
+	const unsigned long id = hexBytesToInt(idString, 4);
 	unsigned char ability[3];
-	readFromMemory(fd, address - 0x78, 3, ability);
+	readFromMemory(ctx->fd, ctx->attributeBase - 0x78, 3, ability);
 	unsigned char bytes[8];
-	readFromMemory(fd, address + 0x78, 8, bytes);
+	readFromMemory(ctx->fd, ctx->attributeBase + 0x78, 8, bytes);
 	unsigned char attributes[56];
-	readFromMemory(fd, address - 0x61, 54, attributes);
+	readFromMemory(ctx->fd, ctx->attributeBase - 0x61, 54, attributes);
 	unsigned char positions[15];
-	readFromMemory(fd, address - 0x70, 15, positions);
+	readFromMemory(ctx->fd, ctx->attributeBase - 0x70, 15, positions);
 
 	const bool canDevelopQuickly = attributes[48] < 70 && bytes[1] > 10 && bytes[4] > 10 && attributes[51] > 50;
 	// TODO: depends on age
@@ -34,12 +37,10 @@ void printPlayer(const int fd, const long address) {
 
 	printf("\n\n\n\n\n\n\n\n");
 
-	printf(".------------------------------------------.-------------------------"
-		"-----------------.\n");
-	printf("| %ld (GK, DL/R, ST)          %s%s\n", hexBytesToInt(id, 4), fastLearnerString, hotProspectString);
+	printf(".------------------------------------------.------------------------------------------.\n");
+	printf("| %ld (GK, DL/R, ST)          %s%s\n", id, fastLearnerString, hotProspectString);
 	printf("| Ability: %d/%d\n", ability[0], ability[2]);
-	printf(".------------------------------------------.-------------------------"
-		"-----------------.\n");
+	printf(".------------------------------------------.------------------------------------------.\n");
 
 	printf("| Adaptability:  ");
 	padLeft(bytes[0]);
@@ -71,8 +72,7 @@ void printPlayer(const int fd, const long address) {
 	padLeft(attributes[47]);
 
 	printf("\n");
-	printf(".------------------------------------------.-------------------------"
-		"-----------------.\n");
+	printf(".------------------------------------------.------------------------------------------.\n");
 	// Age
 	// Positions
 
@@ -84,6 +84,8 @@ void printPlayer(const int fd, const long address) {
 			printf("| %s: %.4g%%\n", roles[i].name, raw);
 		}
 	}
+
+	return id;
 }
 
 float calculateRoleScores(const unsigned char attributes[54], const unsigned char weights[54]) {

@@ -1,4 +1,3 @@
-#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -13,15 +12,8 @@ int main(const int argc, const char *argv[]) {
 	const long pid = strtol(path, NULL, 10);
 	fclose(fp);
 
-	char *pathToProcessMemory = malloc(32);
-	sprintf(pathToProcessMemory, "/proc/%ld/mem", pid);
-
-	const int fileDescriptorMemory = open(pathToProcessMemory, O_RDWR);
-	if (fileDescriptorMemory == -1) {
-		printf("Could not open %s\n", pathToProcessMemory);
-		exit(1);
-	}
-	free(pathToProcessMemory);
+	Context ctx = {.fd = 0};
+	sprintf(ctx.memoryPath, "/proc/%ld/mem", pid);
 
 	bool autoShow = 0;
 	for (unsigned int i = 1; i < argc; i++) {
@@ -31,5 +23,5 @@ int main(const int argc, const char *argv[]) {
 		}
 	}
 
-	run(fileDescriptorMemory, autoShow);
+	run(&ctx, autoShow);
 }

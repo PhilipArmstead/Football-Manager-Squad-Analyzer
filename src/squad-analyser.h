@@ -3,4 +3,4 @@
 #include "types.h"
 
 
-void run(int fileDescriptorMemory, bool autoShow);
+void run(Context *ctx, bool autoShow);
