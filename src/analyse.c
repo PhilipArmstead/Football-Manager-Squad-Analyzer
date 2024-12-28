@@ -76,7 +76,7 @@ unsigned long printPlayer(Context *ctx) {
 	// Age
 	// Positions
 
-	for (char i = 0; i < 12; ++i) {
+	for (char i = 0; i < ROLE_COUNT; ++i) {
 		const short familiarity = positions[roles[i].positionIndex];
 		if (familiarity >= 10) {
 			double raw = calculateRoleScores(attributes, *roles[i].weights);

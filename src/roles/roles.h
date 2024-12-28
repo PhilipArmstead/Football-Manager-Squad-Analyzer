@@ -10,6 +10,8 @@
 #include "./pfa.h"
 #include "./skd.h"
 
+#define ROLE_COUNT 12
+
 typedef struct {
 	char name[16];
 	unsigned char positionIndex;
@@ -17,7 +19,7 @@ typedef struct {
 } Role;
 
 
-Role roles[12] = {
+Role roles[ROLE_COUNT] = {
 	{"GK", 0, sweeperKeeperDefend},
 	{"DL (FBA) ", 2, fullBackAttack},
 	{"DC (BPD) ", 3, ballPlayingDefender},
