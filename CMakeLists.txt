@@ -12,5 +12,6 @@ add_executable(
 	src/memory.c
 	src/squad-analyser.c
 	src/wonderkid.c
+	src/roles/roles.c
 	main.c
 )

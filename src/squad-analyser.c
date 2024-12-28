@@ -3,6 +3,7 @@
 #include "squad-analyser.h"
 #include "analyse.h"
 
+extern const Role roles[ROLE_COUNT];
 
 static inline void removeFromWatchList(Context *ctx, WatchList *watchList, const unsigned char index) {
 	for (unsigned char i = index; i < watchList->length - 1; ++i) {

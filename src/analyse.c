@@ -7,6 +7,8 @@
 #include "./roles/roles.h"
 
 
+extern const Role roles[ROLE_COUNT];
+
 static inline void padLeft(const unsigned char byte) {
 	if (byte < 10) {
 		printf(" ");
