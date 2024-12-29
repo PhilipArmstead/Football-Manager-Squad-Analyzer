@@ -1,6 +1,6 @@
 #pragma once
 
-unsigned char advancedForwardAttack[54] = {
+u8 advancedForwardAttack[54] = {
 	0, // Cro
 	3, // Dri
 	5, // Fin

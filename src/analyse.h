@@ -3,5 +3,5 @@
 #include "types.h"
 
 
-unsigned long printPlayer(Context *ctx);
-float calculateRoleScores(const unsigned char attributes[54], const unsigned char weights[54]);
+void printPlayer(const Context *ctx, unsigned long attributeBase);
+float calculateRoleScores(const u8 attributes[54], const u8 weights[54]);

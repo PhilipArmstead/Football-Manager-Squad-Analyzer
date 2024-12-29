@@ -1,6 +1,6 @@
 #pragma once
 
-unsigned char ballPlayingDefender[54] = {
+u8 ballPlayingDefender[54] = {
 	0, // Cro
 	0, // Dri
 	0, // Fin

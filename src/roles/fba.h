@@ -1,6 +1,6 @@
 #pragma once
 
-unsigned char fullBackAttack[54] = {
+u8 fullBackAttack[54] = {
 	3, // Cro
 	1, // Dri
 	0, // Fin

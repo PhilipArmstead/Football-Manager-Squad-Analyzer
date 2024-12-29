@@ -1,6 +1,6 @@
 #pragma once
 
-unsigned char defensiveMidfielder[54] = {
+u8 defensiveMidfielder[54] = {
 	0, // Cro
 	0, // Dri
 	0, // Fin

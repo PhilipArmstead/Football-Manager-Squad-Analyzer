@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "analyse.h"
+#include "constants.h"
 #include "maths.h"
 #include "memory.h"
 #include "types.h"
@@ -9,31 +10,30 @@
 
 extern const Role roles[ROLE_COUNT];
 
-static inline void padLeft(const unsigned char byte) {
+static inline void padLeft(const u8 byte) {
 	if (byte < 10) {
 		printf(" ");
 	}
 	printf("%d", byte);
 }
 
-unsigned long printPlayer(Context *ctx) {
-	openMemory(ctx);
-
-	unsigned char idString[4];
-	readFromMemory(ctx->fd, ctx->attributeBase + 0x0C, 4, idString);
+void printPlayer(const Context *ctx, const unsigned long attributeBase) {
+	u8 idString[4];
+	readFromMemory(ctx->fd, attributeBase + OFFSET_ID, 4, idString);
 	const unsigned long id = hexBytesToInt(idString, 4);
-	unsigned char ability[3];
-	readFromMemory(ctx->fd, ctx->attributeBase - 0x78, 3, ability);
-	unsigned char bytes[8];
-	readFromMemory(ctx->fd, ctx->attributeBase + 0x78, 8, bytes);
-	unsigned char attributes[56];
-	readFromMemory(ctx->fd, ctx->attributeBase - 0x61, 54, attributes);
-	unsigned char positions[15];
-	readFromMemory(ctx->fd, ctx->attributeBase - 0x70, 15, positions);
+	u8 ability[4];
+	readFromMemory(ctx->fd, attributeBase + OFFSET_ABILITY, 3, ability);
+	u8 personality[8];
+	readFromMemory(ctx->fd, attributeBase + OFFSET_PERSONALITY, 8, personality);
+	u8 attributes[56];
+	readFromMemory(ctx->fd, attributeBase + OFFSET_ATTRIBUTES, 54, attributes);
 
-	const bool canDevelopQuickly = attributes[48] < 70 && bytes[1] > 10 && bytes[4] > 10 && attributes[51] > 50;
-	// TODO: depends on age
-	const bool isHotProspect = 0;
+	const bool canDevelopQuickly =
+		attributes[48] < 70 &&
+		personality[PERSONALITY_AMBITION] > 10 &&
+		personality[PERSONALITY_PROFESSIONALISM] > 10 &&
+		attributes[51] > 50;
+	const bool isHotProspect = 0; // TODO: depends on age
 	char *fastLearnerString = canDevelopQuickly ? "Fast learner  " : "";
 	char *hotProspectString = isHotProspect ? "Hot prospect  " : "";
 
@@ -41,44 +41,45 @@ unsigned long printPlayer(Context *ctx) {
 
 	printf(".------------------------------------------.------------------------------------------.\n");
 	printf("| %ld (GK, DL/R, ST)          %s%s\n", id, fastLearnerString, hotProspectString);
-	printf("| Ability: %d/%d\n", ability[0], ability[2]);
+	printf("| Ability: %d/%d\n", ability[ABILITY_CA], ability[ABILITY_PA]);
 	printf(".------------------------------------------.------------------------------------------.\n");
 
 	printf("| Adaptability:  ");
-	padLeft(bytes[0]);
+	padLeft(personality[PERSONALITY_ADAPTABILITY]);
 	printf("  Professionalism:  ");
-	padLeft(bytes[4]);
+	padLeft(personality[PERSONALITY_PROFESSIONALISM]);
 	printf("  | Consistency:    ");
 	padLeft(attributes[44]);
-	printf("  Injury proneness:  ");
+	printf("  In4jury proneness:  ");
 	padLeft(attributes[48]);
 	printf("\n| Ambition:      ");
-	padLeft(bytes[1]);
+	padLeft(personality[PERSONALITY_AMBITION]);
 	printf("  Sportsmanship:    ");
-	padLeft(bytes[5]);
+	padLeft(personality[PERSONALITY_SPORTSMANSHIP]);
 	printf("  | Determination:  ");
 	padLeft(attributes[51]);
 	printf("  Versatility:       ");
 	padLeft(attributes[49]);
 	printf("\n| Loyalty:       ");
-	padLeft(bytes[2]);
+	padLeft(personality[PERSONALITY_LOYALTY]);
 	printf("  Temperament:      ");
-	padLeft(bytes[6]);
+	padLeft(personality[PERSONALITY_TEMPERAMENT]);
 	printf("  | Dirtiness:      ");
 	padLeft(attributes[41]);
 	printf("\n| Pressure:      ");
-	padLeft(bytes[3]);
+	padLeft(personality[PERSONALITY_PRESSURE]);
 	printf("  Controversy:      ");
-	padLeft(bytes[7]);
+	padLeft(personality[PERSONALITY_CONTROVERSY]);
 	printf("  | Imp. Matches:   ");
 	padLeft(attributes[47]);
 
 	printf("\n");
 	printf(".------------------------------------------.------------------------------------------.\n");
 	// Age
-	// Positions
 
-	for (char i = 0; i < ROLE_COUNT; ++i) {
+	u8 positions[15];
+	readFromMemory(ctx->fd, attributeBase + OFFSET_POSITIONS, 15, positions);
+	for (u8 i = 0; i < ROLE_COUNT; ++i) {
 		const short familiarity = positions[roles[i].positionIndex];
 		if (familiarity >= 10) {
 			double raw = calculateRoleScores(attributes, *roles[i].weights);
@@ -86,14 +87,12 @@ unsigned long printPlayer(Context *ctx) {
 			printf("| %s: %.4g%%\n", roles[i].name, raw);
 		}
 	}
-
-	return id;
 }
 
-float calculateRoleScores(const unsigned char attributes[54], const unsigned char weights[54]) {
+float calculateRoleScores(const u8 attributes[54], const u8 weights[54]) {
 	float totalScore = 0;
 	float totalWeight = 0;
-	for (char i = 0; i < 54; ++i) {
+	for (u8 i = 0; i < 54; ++i) {
 		totalScore += (float)(attributes[i] * weights[i]);
 		totalWeight += (float)weights[i];
 	}

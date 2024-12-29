@@ -1,6 +1,7 @@
 #include <unistd.h>
 
 #include "wonderkid.h"
+#include "constants.h"
 
 
 // TODO: this needs work before it becomes the final Wonderkid generator.
@@ -9,7 +10,7 @@ void makePerfect(const int fd, const long address) {
 	const char max = 100;
 	const char min = 1;
 
-	lseek(fd, address - 0x61, SEEK_SET);
+	lseek(fd, address + OFFSET_ATTRIBUTES, SEEK_SET);
 	for (short i = 0; i < 41; ++i) {
 		write(fd, &max, 1);
 	}
@@ -23,7 +24,7 @@ void makePerfect(const int fd, const long address) {
 		write(fd, &max, 1);
 	}
 
-	lseek(fd, address + 0x78, SEEK_SET);
+	lseek(fd, address + OFFSET_PERSONALITY, SEEK_SET);
 	const char twenty = 20;
 	for (short i = 0; i < 8; ++i) {
 		write(fd, &twenty, 1);

@@ -2,47 +2,88 @@
 
 #include "squad-analyser.h"
 #include "analyse.h"
+#include "constants.h"
+#include "maths.h"
+#include "memory.h"
+#include "roles.h"
+
 
 extern const Role roles[ROLE_COUNT];
 
-static inline void removeFromWatchList(Context *ctx, WatchList *watchList, const unsigned char index) {
-	for (unsigned char i = index; i < watchList->length - 1; ++i) {
+static inline void removeFromWatchList(WatchList *watchList, const u8 index) {
+	for (u8 i = index; i < watchList->length - 1; ++i) {
 		watchList->values[i] = watchList->values[i + 1];
 	}
 	--watchList->length;
 }
 
-static inline void addToWatchList(Context *ctx, WatchList *watchList, const unsigned long value) {
-	unsigned char index = watchList->length;
+static inline void addToWatchList(const unsigned long attributeBase, WatchList *watchList) {
+	u8 index = watchList->length;
 	// TODO: we _can_ get this value when we check if this exists in the array initially
-	for (unsigned char i = 0; i < watchList->length; ++i) {
-		if (watchList->values[i] > value) {
+	for (u8 i = 0; i < watchList->length; ++i) {
+		if (watchList->values[i] > attributeBase) {
 			index = i;
 			break;
 		}
 	}
 
-	for (unsigned char i = watchList->length; i > index; --i) {
+	for (u8 i = watchList->length; i > index; --i) {
 		watchList->values[i] = watchList->values[i - 1];
 	}
 
-	watchList->values[index] = value;
+	watchList->values[index] = attributeBase;
 	++watchList->length;
 }
 
-void showSquadList(Context *ctx, WatchList *watchList) {}
+void showSquadList(const Context *ctx, const WatchList *watchList) {
+	printf("           ");
+	for (u8 i = 0; i < ROLE_COUNT; ++i) {
+		printf("| %s ", roles[i].name);
+	}
+	printf("|\n");
+
+	for (u8 i = 0; i < watchList->length; ++i) {
+		const unsigned long address = watchList->values[i];
+
+		u8 idString[4];
+		readFromMemory(ctx->fd, address + OFFSET_ID, 4, idString);
+		printf("| %ld ", hexBytesToInt(idString, 4));
+
+		u8 positions[15];
+		readFromMemory(ctx->fd, address + OFFSET_POSITIONS, 15, positions);
+		u8 attributes[56];
+		readFromMemory(ctx->fd, address + OFFSET_ATTRIBUTES, 54, attributes);
+
+		for (u8 j = 0; j < ROLE_COUNT; ++j) {
+			const short familiarity = positions[roles[j].positionIndex];
+			if (familiarity >= 10) {
+				double raw = calculateRoleScores(attributes, *roles[j].weights);
+				raw -= raw * 0.025 * (20 - familiarity);
+				printf("| %.4g%%    ", raw);
+			} else {
+				printf("|           ");
+			}
+		}
+		printf("\n");
+	}
+}
 
 void showPlayerScreen(Context *ctx, WatchList *watchList) {
-	const unsigned long id = printPlayer(ctx);
+	// FIXME: this fails to work when the player is also staff
+	u8 bytes[4];
+	readFromMemory(ctx->fd, POINTER_TO_ATTRIBUTES, 4, bytes);
+	const unsigned long attributeBase = hexBytesToInt(bytes, 4);
 
-	unsigned char watchIndex;
+	printPlayer(ctx, attributeBase);
+
+	u8 watchIndex;
 	bool isBeingWatched = 0;
-	for (unsigned char i = 0; i < watchList->length; ++i) {
+	for (u8 i = 0; i < watchList->length; ++i) {
 		if (watchList->values[i] < i) {
 			continue;
 		}
 
-		if (watchList->values[i] == id) {
+		if (watchList->values[i] == attributeBase) {
 			watchIndex = i;
 			isBeingWatched = 1;
 		}
@@ -58,9 +99,9 @@ void showPlayerScreen(Context *ctx, WatchList *watchList) {
 	while ((c = getchar()) != '\n' && c != EOF) {
 		if (c == 'w') {
 			if (isBeingWatched) {
-				removeFromWatchList(ctx, watchList, watchIndex);
+				removeFromWatchList(watchList, watchIndex);
 			} else {
-				addToWatchList(ctx, watchList, id);
+				addToWatchList(attributeBase, watchList);
 			}
 		}
 	}

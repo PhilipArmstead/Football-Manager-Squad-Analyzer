@@ -5,7 +5,6 @@ typedef unsigned char u8;
 
 typedef struct {
 	int fd;
-	char memoryPath[32];
 	long attributeBase;
 } Context;
 

@@ -2,17 +2,18 @@
 
 #include <unistd.h>
 
-#include "types.h"
 
-
-static inline void readFromMemory(const int fd, const long address, const int length, unsigned char *bytes) {
+static inline void readFromMemory(const int fd, const unsigned long address, const int length, u8 *bytes) {
 	lseek(fd, address, SEEK_SET);
 	read(fd, bytes, length);
 }
 
-static inline void writeToMemory(const int fd, const long address, const int length, const unsigned char *bytes) {
+static inline void writeToMemory(
+	const int fd,
+	const unsigned long address,
+	const int length,
+	const u8 *bytes
+) {
 	lseek(fd, address, SEEK_SET);
 	write(fd, bytes, length);
 }
-
-void openMemory(Context *ctx);

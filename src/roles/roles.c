@@ -9,8 +9,9 @@
 #include "pfa.h"
 #include "skd.h"
 
+
 const Role roles[ROLE_COUNT] = {
-	{"GK", 0, sweeperKeeperDefend},
+	{"GK       ", 0, sweeperKeeperDefend},
 	{"DL (FBA) ", 2, fullBackAttack},
 	{"DC (BPD) ", 3, ballPlayingDefender},
 	{"DR (FBA) ", 4, fullBackAttack},

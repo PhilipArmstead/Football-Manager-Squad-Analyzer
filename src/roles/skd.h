@@ -1,6 +1,6 @@
 #pragma once
 
-unsigned char sweeperKeeperDefend[54] = {
+u8 sweeperKeeperDefend[54] = {
 	0, // Cro
 	0, // Dri
 	0, // Fin
