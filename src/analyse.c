@@ -11,11 +11,12 @@
 extern const Role roles[ROLE_COUNT];
 
 void printPlayer(
-	const unsigned long id,
 	const u8 ability[3],
 	const u8 attributes[56],
 	const u8 personality[8],
-	const u8 positions[15]
+	const u8 positions[15],
+	const u8 forename[32],
+	const u8 surname[32]
 ) {
 	const bool canDevelopQuickly =
 		attributes[48] < 70 &&
@@ -32,7 +33,7 @@ void printPlayer(
 	// TODO: add age
 	// TODO: add name
 	printf(".------------------------------------------.------------------------------------------.\n");
-	printf("| %ld (GK, DL/R, ST)          %s%s\n", id, fastLearnerString, hotProspectString);
+	printf("| %s %s (GK, DL/R, ST)          %s%s\n", forename, surname, fastLearnerString, hotProspectString);
 	printf("| Ability: %d/%d\n", ability[ABILITY_CA], ability[ABILITY_PA]);
 	printf(".------------------------------------------.------------------------------------------.\n");
 

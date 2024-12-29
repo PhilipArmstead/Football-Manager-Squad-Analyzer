@@ -70,6 +70,25 @@ void showSquadList(const Context *ctx, const WatchList *watchList) {
 	}
 }
 
+static inline void getPlayerName(const int fd, u8 pointer[4], u8 str[32]) {
+	unsigned long a = hexBytesToInt(pointer, 4);
+	readFromMemory(fd, a, 4, pointer);
+	a = hexBytesToInt(pointer, 4);
+	readFromMemory(fd, a + 4, 32, str);
+}
+
+static inline void getPlayerForename(const int fd, const unsigned long attributeBase, u8 str[32]) {
+	u8 pointer[4];
+	readFromMemory(fd, attributeBase + OFFSET_FORENAME, 4, pointer);
+	getPlayerName(fd, pointer, str);
+}
+
+static inline void getPlayerSurname(const int fd, const unsigned long attributeBase, u8 str[32]) {
+	u8 pointer[4];
+	readFromMemory(fd, attributeBase + OFFSET_SURNAME, 4, pointer);
+	getPlayerName(fd, pointer, str);
+}
+
 void showPlayerScreen(const Context *ctx, WatchList *watchList) {
 	// FIXME: this fails to work when the player is also staff
 	u8 bytes[4];
@@ -87,17 +106,18 @@ void showPlayerScreen(const Context *ctx, WatchList *watchList) {
 		}
 	}
 
-	u8 idString[4];
-	readFromMemory(ctx->fd, attributeBase + OFFSET_ID, 4, idString);
-	const unsigned long id = hexBytesToInt(idString, 4);
 	u8 ability[3];
 	readFromMemory(ctx->fd, attributeBase + OFFSET_ABILITY, 3, ability);
 	u8 personality[8];
 	readFromMemory(ctx->fd, attributeBase + OFFSET_PERSONALITY, 8, personality);
 	u8 attributes[56];
 	readFromMemory(ctx->fd, attributeBase + OFFSET_ATTRIBUTES, 54, attributes);
+	u8 forename[32];
+	getPlayerForename(ctx->fd, attributeBase, forename);
+	u8 surname[32];
+	getPlayerSurname(ctx->fd, attributeBase, surname);
 
-	printPlayer(id, ability, attributes, personality, positions);
+	printPlayer(ability, attributes, personality, positions, forename, surname);
 
 	u8 watchIndex;
 	bool isBeingWatched = 0;
