@@ -76,7 +76,28 @@ void showPlayerScreen(const Context *ctx, WatchList *watchList) {
 	readFromMemory(ctx->fd, POINTER_TO_ATTRIBUTES, 4, bytes);
 	const unsigned long attributeBase = hexBytesToInt(bytes, 4);
 
-	printPlayer(ctx, attributeBase);
+	u8 positions[15];
+	readFromMemory(ctx->fd, attributeBase + OFFSET_POSITIONS, 15, positions);
+
+	// Verify player is valid
+	for (u8 i = 0; i < 15; ++i) {
+		if (positions[i] > 20) {
+			printf("Cannot see player.\n");
+			return;
+		}
+	}
+
+	u8 idString[4];
+	readFromMemory(ctx->fd, attributeBase + OFFSET_ID, 4, idString);
+	const unsigned long id = hexBytesToInt(idString, 4);
+	u8 ability[3];
+	readFromMemory(ctx->fd, attributeBase + OFFSET_ABILITY, 3, ability);
+	u8 personality[8];
+	readFromMemory(ctx->fd, attributeBase + OFFSET_PERSONALITY, 8, personality);
+	u8 attributes[56];
+	readFromMemory(ctx->fd, attributeBase + OFFSET_ATTRIBUTES, 54, attributes);
+
+	printPlayer(id, ability, attributes, personality, positions);
 
 	u8 watchIndex;
 	bool isBeingWatched = 0;
@@ -93,7 +114,6 @@ void showPlayerScreen(const Context *ctx, WatchList *watchList) {
 		break;
 	}
 
-	// TODO: fix this being logged twice
 	// TODO: don't offer to watch if the list is full
 	// TODO: make a linked list?
 	printf(isBeingWatched ? "Un(w)atch player? " : "(w)atch player? ");
