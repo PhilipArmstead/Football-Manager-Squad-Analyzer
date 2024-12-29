@@ -7,6 +7,7 @@
 
 typedef struct {
 	char name[16];
+	u8 nameLength;
 	u8 positionIndex;
-	u8 *weights[54];
+	u8 *weights;
 } Role;

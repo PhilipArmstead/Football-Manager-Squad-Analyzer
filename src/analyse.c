@@ -58,7 +58,7 @@ void printPlayer(
 	for (u8 i = 0; i < ROLE_COUNT; ++i) {
 		const short familiarity = positions[roles[i].positionIndex];
 		if (familiarity >= 10) {
-			double raw = calculateRoleScores(attributes, *roles[i].weights);
+			double raw = calculateRoleScores(attributes, roles[i].weights);
 			raw -= raw * 0.025 * (20 - familiarity);
 			printf("| %s: %.4g%%\n", roles[i].name, raw);
 		}

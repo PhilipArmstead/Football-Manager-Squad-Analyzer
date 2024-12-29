@@ -9,7 +9,14 @@ typedef struct {
 } Context;
 
 typedef struct {
+	unsigned long address;
+	u8 nameLength;
+	u8 forename[32];
+	u8 surname[32];
+} WatchedPlayer;
+
+typedef struct {
 	u8 length;
-	unsigned long values[32];
+	WatchedPlayer player[32];
 } WatchList;
 
