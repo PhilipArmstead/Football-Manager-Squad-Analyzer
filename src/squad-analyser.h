@@ -3,4 +3,4 @@
 #include "types.h"
 
 
-void run(Context *ctx, bool autoShow);
+void run(const Context *ctx, bool autoShow);

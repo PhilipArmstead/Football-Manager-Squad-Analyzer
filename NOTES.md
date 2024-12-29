@@ -5,7 +5,7 @@
 - -0x78 = CA
 - -0x76 = PA
 - -0x70 = position start (GK)
-- -0x6F = Libero (unused?)
+- -0x6F = Sweeper (unused?)
 - -0x6E = DL
 - -0x6D = DC
 - -0x6C = DR
@@ -120,4 +120,25 @@ base  A668: 78 EE A4 45 01 00 00 00 1E 28 00 00 4D BD 54 77
 0x3E4DA738: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
 0x3E4DA748: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
 0x3E4DA758: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+```
+
+## Other stuff
+
+0x172a6aa: current screen's name?
+
+### Names
+
+```
+0x1736440 
+0x41bf835
+0x41bf985 
+0x21f37f60
+0x21f3c7aa
+0x234eb6dc
+0x25063c50
+0x253abb3b
+0x278d5e70
+0x278d60f0
+0x278dd530
+0x51be3e05 <-- 0x29a1a335
 ```

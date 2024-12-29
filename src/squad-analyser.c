@@ -36,7 +36,7 @@ static inline void addToWatchList(const unsigned long attributeBase, WatchList *
 }
 
 void showSquadList(const Context *ctx, const WatchList *watchList) {
-	printf("           ");
+	printf("             ");
 	for (u8 i = 0; i < ROLE_COUNT; ++i) {
 		printf("| %s ", roles[i].name);
 	}
@@ -59,7 +59,9 @@ void showSquadList(const Context *ctx, const WatchList *watchList) {
 			if (familiarity >= 10) {
 				double raw = calculateRoleScores(attributes, *roles[j].weights);
 				raw -= raw * 0.025 * (20 - familiarity);
-				printf("| %.4g%%    ", raw);
+				char s[8];
+				sprintf(s, "%.4g%%", raw);
+				printf("| %-6s    ", s);
 			} else {
 				printf("|           ");
 			}
@@ -68,7 +70,7 @@ void showSquadList(const Context *ctx, const WatchList *watchList) {
 	}
 }
 
-void showPlayerScreen(Context *ctx, WatchList *watchList) {
+void showPlayerScreen(const Context *ctx, WatchList *watchList) {
 	// FIXME: this fails to work when the player is also staff
 	u8 bytes[4];
 	readFromMemory(ctx->fd, POINTER_TO_ATTRIBUTES, 4, bytes);
@@ -107,7 +109,7 @@ void showPlayerScreen(Context *ctx, WatchList *watchList) {
 	}
 }
 
-void run(Context *ctx, const bool autoShow) {
+void run(const Context *ctx, const bool autoShow) {
 	WatchList watchList = {0};
 
 	if (autoShow) {
