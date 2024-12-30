@@ -1,5 +1,8 @@
 #pragma once
 
+#include "types.h"
+
+
 static inline int power(const int base, int exp) {
 	int result = 1;
 	while (exp--) result *= base;

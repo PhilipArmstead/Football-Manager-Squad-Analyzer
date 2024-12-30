@@ -4,6 +4,7 @@
 #include "squad-analyser.h"
 #include "analyse.h"
 #include "constants.h"
+#include "date-time.h"
 #include "maths.h"
 #include "memory.h"
 #include "roles.h"
