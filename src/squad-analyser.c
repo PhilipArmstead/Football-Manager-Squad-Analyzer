@@ -152,7 +152,7 @@ void showPlayerScreen(const Context *ctx, WatchList *watchList) {
 	printPlayer(ability, attributes, personality, positions, forename, surname);
 
 	u8 watchIndex;
-	bool isBeingWatched = 0;
+	bool isBeingWatched = false;
 	for (u8 i = 0; i < watchList->length; ++i) {
 		if (watchList->player[i].address < i) {
 			continue;
@@ -160,7 +160,7 @@ void showPlayerScreen(const Context *ctx, WatchList *watchList) {
 
 		if (watchList->player[i].address == attributeBase) {
 			watchIndex = i;
-			isBeingWatched = 1;
+			isBeingWatched = true;
 		}
 
 		break;

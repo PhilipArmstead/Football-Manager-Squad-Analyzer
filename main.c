@@ -24,10 +24,10 @@ int main(const int argc, const char *argv[]) {
 	}
 
 	// Parse command line args
-	bool autoShow = 0;
+	bool autoShow = false;
 	for (unsigned int i = 1; i < argc; i++) {
 		if (strcmp(argv[i], "-s") == 0) {
-			autoShow = 1;
+			autoShow = true;
 			break;
 		}
 	}

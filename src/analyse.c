@@ -23,7 +23,7 @@ void printPlayer(
 		personality[PERSONALITY_AMBITION] > 10 &&
 		personality[PERSONALITY_PROFESSIONALISM] > 10 &&
 		attributes[51] > 50;
-	const bool isHotProspect = 0; // TODO: depends on age
+	const bool isHotProspect = false; // TODO: depends on age
 	char *fastLearnerString = canDevelopQuickly ? "Fast learner  " : "";
 	char *hotProspectString = isHotProspect ? "Hot prospect  " : "";
 
