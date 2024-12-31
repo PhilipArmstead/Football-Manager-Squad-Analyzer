@@ -3,8 +3,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "./src/squad-analyser.h"
+#include "analyse.h"
 #include "./src/types.h"
+
 
 int main(const int argc, const char *argv[]) {
 	// Get process ID for game
@@ -32,5 +33,51 @@ int main(const int argc, const char *argv[]) {
 		}
 	}
 
-	run(&ctx, autoShow);
+	// Searched for 1152962544
+	// unsigned long address = 0x3bc91e00;
+	// for (u8 i = 0; i < 23; ++i) {
+	// 	u8 pointer[4];
+	// 	readFromMemory(ctx->fd, address, 4, pointer);
+	// 	address += 0x08;
+	// 	const unsigned long pAddress = hexBytesToInt(pointer, 4);
+	//
+	// 	u8 forename[32] = {0};
+	// 	getPlayerForename(ctx->fd, pAddress, forename);
+	// 	u8 surname[32] = {0};
+	// 	getPlayerSurname(ctx->fd, pAddress, surname);
+	//
+	// 	printf("%d: %s %s\n", i, forename, surname);
+	// }
+
+	WatchList watchList = {0};
+
+	if (autoShow) {
+		showPlayerScreen(&ctx, &watchList);
+	}
+
+	while (1) {
+		printf("\n(s)how player profile\n");
+		if (watchList.length) {
+			printf("(l)ist watched players\n");
+		}
+		printf("e(x)it\n");
+		const u8 c = getchar();
+		if (c == 'x') {
+			break;
+		}
+
+		if (c == 's') {
+			getchar(); // swallow newline
+			showPlayerScreen(&ctx, &watchList);
+		} else if (c == 'l') {
+			getchar(); // swallow newline
+			showSquadList(&ctx, &watchList);
+		}
+	}
+
+	// FILE *f = fopen("./watch-list.txt", "w");
+	// for (u8 i = 0; i < watchList.length; ++i) {
+	// fprintf(f, "%ld\n", watchList.values[i]);
+	// }
+	// fclose(f);
 }

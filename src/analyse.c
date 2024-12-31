@@ -1,37 +1,139 @@
 #include <stdio.h>
+#include <string.h>
 
 #include "analyse.h"
-#include "constants.h"
-#include "maths.h"
-#include "memory.h"
-#include "types.h"
-#include "./roles/roles.h"
+#include "date-time.h"
+#include "roles.h"
+#include "watch-list.h"
 
 
 extern const Role roles[ROLE_COUNT];
 
-static inline bool getIsHotProspect(const u8 age, const u8 currentAbility) {
-	if (age <= 19) {
-		return currentAbility >= 80 + 5 * (age - 15);
+void showSquadList(const Context *ctx, WatchList *watchList) {
+	// Get the length of the longest player name
+	// Possibly cache the lengths too so we don't need to do this again
+	u8 longestName = 0;
+	for (u8 i = 0; i < watchList->length; ++i) {
+		WatchedPlayer *p = &watchList->player[i];
+		if (!p->nameLength) {
+			// TODO: diacritics break this
+			p->nameLength = strlen(p->forename) + strlen(p->surname);
+		}
+		if (p->nameLength > longestName) {
+			longestName = p->nameLength;
+		}
 	}
-	if (age <= 23) {
-		return currentAbility >= 140;
+
+	for (u8 i = 0; i < longestName + 5; ++i) {
+		printf(" ");
 	}
-	return false;
+	printf("| Age ");
+	for (u8 i = 0; i < ROLE_COUNT; ++i) {
+		printf("| %s ", roles[i].name);
+		for (u8 j = roles[i].nameLength; j < 6; ++j) {
+			printf(" ");
+		}
+	}
+	printf("|\n");
+
+	const Date date = getDate(ctx->fd);
+	for (u8 i = 0; i < watchList->length; ++i) {
+		WatchedPlayer *p = &watchList->player[i];
+
+		printf("| %s, %s ", p->surname, p->forename);
+		for (u8 j = p->nameLength; j < longestName; ++j) {
+			printf(" ");
+		}
+
+		printf("| %3d ", getAge(ctx->fd, p->address, date));
+
+		u8 positions[15];
+		readFromMemory(ctx->fd, p->address + OFFSET_POSITIONS, 15, positions);
+		u8 attributes[56];
+		readFromMemory(ctx->fd, p->address + OFFSET_ATTRIBUTES, 54, attributes);
+
+		for (u8 j = 0; j < ROLE_COUNT; ++j) {
+			const short familiarity = positions[roles[j].positionIndex];
+			if (familiarity >= 10) {
+				double raw = calculateRoleScores(attributes, roles[j].weights);
+				raw -= raw * 0.025 * (20 - familiarity);
+				char s[8];
+				sprintf(s, "%.4g%%", raw);
+				printf("| %-6s ", s);
+				for (u8 k = 6; k < roles[j].nameLength; ++k) {
+					printf(" ");
+				}
+			} else {
+				printf("|");
+				const u8 min = roles[j].nameLength < 6 ? 6 : roles[j].nameLength;
+				for (u8 k = 0; k < min + 2; ++k) {
+					printf(" ");
+				}
+			}
+		}
+		printf("\n");
+	}
 }
 
-static inline bool getCanDevelopQuickly(
-	const u8 age,
-	const u8 injuryProneness,
-	const u8 ambition,
-	const u8 professionalism,
-	const u8 determination
-) {
-	return age <= 23 &&
-		injuryProneness < 70 &&
-		ambition > 10 &&
-		professionalism > 10 &&
-		determination > 50;
+void showPlayerScreen(const Context *ctx, WatchList *watchList) {
+	// FIXME: this fails to work when the player is also staff
+	u8 bytes[4];
+	readFromMemory(ctx->fd, POINTER_TO_ATTRIBUTES, 4, bytes);
+	const unsigned long attributeBase = hexBytesToInt(bytes, 4);
+
+	u8 positions[15];
+	readFromMemory(ctx->fd, attributeBase + OFFSET_POSITIONS, 15, positions);
+
+	// Verify player is valid
+	for (u8 i = 0; i < 15; ++i) {
+		if (positions[i] > 20) {
+			printf("Cannot see player.\n");
+			return;
+		}
+	}
+
+	u8 ability[3];
+	readFromMemory(ctx->fd, attributeBase + OFFSET_ABILITY, 3, ability);
+	u8 personality[8];
+	readFromMemory(ctx->fd, attributeBase + OFFSET_PERSONALITY, 8, personality);
+	u8 attributes[56];
+	readFromMemory(ctx->fd, attributeBase + OFFSET_ATTRIBUTES, 54, attributes);
+	u8 forename[32];
+	getPlayerForename(ctx->fd, attributeBase, forename);
+	u8 surname[32];
+	getPlayerSurname(ctx->fd, attributeBase, surname);
+	u8 age = getAge(ctx->fd, attributeBase, getDate(ctx->fd));
+
+	printPlayer(ability, attributes, personality, positions, forename, surname, age);
+
+	u8 watchIndex;
+	bool isBeingWatched = false;
+	for (u8 i = 0; i < watchList->length; ++i) {
+		if (watchList->player[i].address < i) {
+			continue;
+		}
+
+		if (watchList->player[i].address == attributeBase) {
+			watchIndex = i;
+			isBeingWatched = true;
+		}
+
+		break;
+	}
+
+	// TODO: don't offer to watch if the list is full
+	// TODO: make a linked list?
+	printf(isBeingWatched ? "Un(w)atch player? " : "(w)atch player? ");
+	u8 c;
+	while ((c = getchar()) != '\n' && c != EOF) {
+		if (c == 'w') {
+			if (isBeingWatched) {
+				removeFromWatchList(watchList, watchIndex);
+			} else {
+				addToWatchList(ctx, attributeBase, watchList);
+			}
+		}
+	}
 }
 
 void printPlayer(
