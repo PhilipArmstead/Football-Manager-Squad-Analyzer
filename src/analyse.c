@@ -9,6 +9,8 @@
 
 extern const Role roles[ROLE_COUNT];
 
+// TODO: add option to sort by columns
+// TODO: add Info (can develop quickly, is hot prospect) columns
 void showSquadList(const Context *ctx, WatchList *watchList) {
 	// Get the length of the longest player name
 	// Possibly cache the lengths too so we don't need to do this again
@@ -27,25 +29,29 @@ void showSquadList(const Context *ctx, WatchList *watchList) {
 	for (u8 i = 0; i < longestName + 5; ++i) {
 		printf(" ");
 	}
-	printf("| Age ");
+	printf(" Age  Ability ");
 	for (u8 i = 0; i < ROLE_COUNT; ++i) {
 		printf("| %s ", roles[i].name);
 		for (u8 j = roles[i].nameLength; j < 6; ++j) {
 			printf(" ");
 		}
 	}
-	printf("|\n");
+	printf("\n");
 
 	const Date date = getDate(ctx->fd);
 	for (u8 i = 0; i < watchList->length; ++i) {
 		WatchedPlayer *p = &watchList->player[i];
 
-		printf("| %s, %s ", p->surname, p->forename);
-		for (u8 j = p->nameLength; j < longestName; ++j) {
+		printf(" %s, %s ", p->surname, p->forename);
+		for (u8 j = p->nameLength; j < longestName + 1; ++j) {
 			printf(" ");
 		}
 
-		printf("| %3d ", getAge(ctx->fd, p->address, date));
+		u8 ability[3];
+		readFromMemory(ctx->fd, p->address + OFFSET_ABILITY, 3, ability);
+
+		printf(" %3d ", getAge(ctx->fd, p->address, date));
+		printf(" %3d/%3d ", ability[ABILITY_CA], ability[ABILITY_PA]);
 
 		u8 positions[15];
 		readFromMemory(ctx->fd, p->address + OFFSET_POSITIONS, 15, positions);
