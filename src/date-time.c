@@ -33,59 +33,65 @@
 
 #define POINTER_TO_CURRENT_DATETIME 0x14631D5BC
 
-void printDateTime(const int fd) {
+Date getDate(const int fd) {
 	u8 bytes[4];
 	readFromMemory(fd, POINTER_TO_CURRENT_DATETIME, 4, bytes);
 
 	const u8 yearBytes[2] = {bytes[2], bytes[3]};
 	const u16 year = hexBytesToInt(yearBytes, 2);
 
-	u16 day = hexBytesToInt(bytes, 1);
+	u16 days = hexBytesToInt(bytes, 1);
 	if (bytes[1] & 1) {
-		day += 255;
+		days += 255;
 	}
 
-	if (day > 59) {
+	if (days > 59) {
 		const bool isLeapYear = !(year % 4) && (year % 100 || !(year % 400));
-		day -= isLeapYear;
+		days -= isLeapYear;
 	}
 
-	if (day <= DAYS_BEFORE_FEBRUARY) {
+	return (Date){days, year};
+}
+
+void printDateTime(const int fd) {
+	Date date = getDate(fd);
+
+	if (date.days <= DAYS_BEFORE_FEBRUARY) {
 		printf("January");
-	} else if (day <= DAYS_BEFORE_MARCH) {
-		day -= DAYS_BEFORE_FEBRUARY;
+	} else if (date.days <= DAYS_BEFORE_MARCH) {
+		date.days -= DAYS_BEFORE_FEBRUARY;
 		printf("February");
-	} else if (day <= DAYS_BEFORE_APRIL) {
-		day -= DAYS_BEFORE_MARCH;
+	} else if (date.days <= DAYS_BEFORE_APRIL) {
+		date.days -= DAYS_BEFORE_MARCH;
 		printf("March");
-	} else if (day <= DAYS_BEFORE_MAY) {
-		day -= DAYS_BEFORE_APRIL;
+	} else if (date.days <= DAYS_BEFORE_MAY) {
+		date.days -= DAYS_BEFORE_APRIL;
 		printf("April");
-	} else if (day <= DAYS_BEFORE_JUNE) {
-		day -= DAYS_BEFORE_MAY;
+	} else if (date.days <= DAYS_BEFORE_JUNE) {
+		date.days -= DAYS_BEFORE_MAY;
 		printf("May");
-	} else if (day <= DAYS_BEFORE_JULY) {
-		day -= DAYS_BEFORE_JUNE;
+	} else if (date.days <= DAYS_BEFORE_JULY) {
+		date.days -= DAYS_BEFORE_JUNE;
 		printf("June");
-	} else if (day <= DAYS_BEFORE_AUGUST) {
-		day -= DAYS_BEFORE_JULY;
+	} else if (date.days <= DAYS_BEFORE_AUGUST) {
+		date.days -= DAYS_BEFORE_JULY;
 		printf("July");
-	} else if (day <= DAYS_BEFORE_SEPTEMBER) {
-		day -= DAYS_BEFORE_AUGUST;
+	} else if (date.days <= DAYS_BEFORE_SEPTEMBER) {
+		date.days -= DAYS_BEFORE_AUGUST;
 		printf("August");
-	} else if (day <= DAYS_BEFORE_OCTOBER) {
-		day -= DAYS_BEFORE_SEPTEMBER;
+	} else if (date.days <= DAYS_BEFORE_OCTOBER) {
+		date.days -= DAYS_BEFORE_SEPTEMBER;
 		printf("September");
-	} else if (day <= DAYS_BEFORE_NOVEMBER) {
-		day -= DAYS_BEFORE_OCTOBER;
+	} else if (date.days <= DAYS_BEFORE_NOVEMBER) {
+		date.days -= DAYS_BEFORE_OCTOBER;
 		printf("October");
-	} else if (day <= DAYS_BEFORE_DECEMBER) {
-		day -= DAYS_BEFORE_NOVEMBER;
+	} else if (date.days <= DAYS_BEFORE_DECEMBER) {
+		date.days -= DAYS_BEFORE_NOVEMBER;
 		printf("November");
 	} else {
-		day -= DAYS_BEFORE_DECEMBER;
+		date.days -= DAYS_BEFORE_DECEMBER;
 		printf("December");
 	}
 
-	printf(" %d, %d\n", day, year);
+	printf(" %d, %d\n", date.days, date.year);
 }

@@ -10,6 +10,7 @@ add_executable(
 	fm_24_squad_analyser
 	src/analyse.c
 	src/date-time.c
+	src/player.c
 	src/squad-analyser.c
 	src/wonderkid.c
 	src/roles/roles.c

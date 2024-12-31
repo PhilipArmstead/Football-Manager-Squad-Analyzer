@@ -10,31 +10,56 @@
 
 extern const Role roles[ROLE_COUNT];
 
+static inline bool getIsHotProspect(const u8 age, const u8 currentAbility) {
+	if (age <= 19) {
+		return currentAbility >= 80 + 5 * (age - 15);
+	}
+	if (age <= 23) {
+		return currentAbility >= 140;
+	}
+	return false;
+}
+
+static inline bool getCanDevelopQuickly(
+	const u8 age,
+	const u8 injuryProneness,
+	const u8 ambition,
+	const u8 professionalism,
+	const u8 determination
+) {
+	return age <= 23 &&
+		injuryProneness < 70 &&
+		ambition > 10 &&
+		professionalism > 10 &&
+		determination > 50;
+}
+
 void printPlayer(
 	const u8 ability[3],
 	const u8 attributes[56],
 	const u8 personality[8],
 	const u8 positions[15],
 	const u8 forename[32],
-	const u8 surname[32]
+	const u8 surname[32],
+	const u8 age
 ) {
-	const bool canDevelopQuickly =
-		attributes[48] < 70 &&
-		personality[PERSONALITY_AMBITION] > 10 &&
-		personality[PERSONALITY_PROFESSIONALISM] > 10 &&
-		attributes[51] > 50;
-	const bool isHotProspect = false; // TODO: depends on age
+	const bool canDevelopQuickly = getCanDevelopQuickly(
+		age,
+		attributes[ATTRIBUTES_INJURY_PRONENESS],
+		personality[PERSONALITY_AMBITION],
+		personality[PERSONALITY_PROFESSIONALISM],
+		attributes[ATTRIBUTES_DETERMINATION]
+	);
+	const bool isHotProspect = getIsHotProspect(age, ability[ABILITY_CA]);
 	char *fastLearnerString = canDevelopQuickly ? "Fast learner  " : "";
 	char *hotProspectString = isHotProspect ? "Hot prospect  " : "";
 
 	printf("\n\n\n\n\n\n\n\n");
 
 	// TODO: fix positions
-	// TODO: add age
-	// TODO: add name
 	printf(".------------------------------------------.------------------------------------------.\n");
-	printf("| %s %s (GK, DL/R, ST)          %s%s\n", forename, surname, fastLearnerString, hotProspectString);
-	printf("| Ability: %d/%d\n", ability[ABILITY_CA], ability[ABILITY_PA]);
+	printf("| %s %s (%d yrs): GK, DL/R, ST\n", forename, surname, age);
+	printf("| Ability: %d/%d  %s%s\n", ability[ABILITY_CA], ability[ABILITY_PA], fastLearnerString, hotProspectString);
 	printf(".------------------------------------------.------------------------------------------.\n");
 
 	printf("| Adaptability:  %2d", personality[PERSONALITY_ADAPTABILITY]);

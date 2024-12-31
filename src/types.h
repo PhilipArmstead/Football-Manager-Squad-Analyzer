@@ -24,3 +24,7 @@ typedef struct {
 	WatchedPlayer player[32];
 } WatchList;
 
+typedef struct {
+	u16 days;
+	u16 year;
+} Date;

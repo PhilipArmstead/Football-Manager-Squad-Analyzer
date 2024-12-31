@@ -7,6 +7,7 @@
 #include "date-time.h"
 #include "maths.h"
 #include "memory.h"
+#include "player.h"
 #include "roles.h"
 
 
@@ -73,9 +74,10 @@ void showSquadList(const Context *ctx, WatchList *watchList) {
 		}
 	}
 
-	for (u8 i = 0; i < longestName + 4; ++i) {
+	for (u8 i = 0; i < longestName + 5; ++i) {
 		printf(" ");
 	}
+	printf("| Age ");
 	for (u8 i = 0; i < ROLE_COUNT; ++i) {
 		printf("| %s ", roles[i].name);
 		for (u8 j = roles[i].nameLength; j < 6; ++j) {
@@ -84,7 +86,7 @@ void showSquadList(const Context *ctx, WatchList *watchList) {
 	}
 	printf("|\n");
 
-
+	const Date date = getDate(ctx->fd);
 	for (u8 i = 0; i < watchList->length; ++i) {
 		WatchedPlayer *p = &watchList->player[i];
 
@@ -92,6 +94,8 @@ void showSquadList(const Context *ctx, WatchList *watchList) {
 		for (u8 j = p->nameLength; j < longestName; ++j) {
 			printf(" ");
 		}
+
+		printf("| %3d ", getAge(ctx->fd, p->address, date));
 
 		u8 positions[15];
 		readFromMemory(ctx->fd, p->address + OFFSET_POSITIONS, 15, positions);
@@ -148,8 +152,9 @@ void showPlayerScreen(const Context *ctx, WatchList *watchList) {
 	getPlayerForename(ctx->fd, attributeBase, forename);
 	u8 surname[32];
 	getPlayerSurname(ctx->fd, attributeBase, surname);
+	u8 age = getAge(ctx->fd, attributeBase, getDate(ctx->fd));
 
-	printPlayer(ability, attributes, personality, positions, forename, surname);
+	printPlayer(ability, attributes, personality, positions, forename, surname, age);
 
 	u8 watchIndex;
 	bool isBeingWatched = false;

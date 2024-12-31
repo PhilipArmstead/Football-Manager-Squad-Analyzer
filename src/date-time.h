@@ -1,3 +1,7 @@
 #pragma once
 
-void printDateTime(unsigned int fd);
+#include "types.h"
+
+
+Date getDate(int fd);
+void printDateTime(int fd);
