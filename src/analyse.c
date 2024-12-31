@@ -187,28 +187,39 @@ void printPlayer(
 
 	printf("| Adaptability:  %2d", personality[PERSONALITY_ADAPTABILITY]);
 	printf("  Professionalism:  %2d", personality[PERSONALITY_PROFESSIONALISM]);
-	printf("  | Consistency:    %2d", attributes[44]);
-	printf("  Injury proneness:  %2d", attributes[48]);
+	printf("  | Consistency:    %2d", (attributes[44] + 4) / 5);
+	printf("  Injury proneness:  %2d", (attributes[48] + 4) / 5);
 	printf("\n| Ambition:      %2d", personality[PERSONALITY_AMBITION]);
 	printf("  Sportsmanship:    %2d", personality[PERSONALITY_SPORTSMANSHIP]);
-	printf("  | Determination:  %2d", attributes[51]);
-	printf("  Versatility:       %2d", attributes[49]);
+	printf("  | Determination:  %2d", (attributes[51] + 4) / 5);
+	printf("  Versatility:       %2d", (attributes[49] + 4) / 5);
 	printf("\n| Loyalty:       %2d", personality[PERSONALITY_LOYALTY]);
 	printf("  Temperament:      %2d", personality[PERSONALITY_TEMPERAMENT]);
-	printf("  | Dirtiness:      %2d", attributes[41]);
+	printf("  | Dirtiness:      %2d", (attributes[41] + 4) / 5);
 	printf("\n| Pressure:      %2d", personality[PERSONALITY_PRESSURE]);
 	printf("  Controversy:      %2d", personality[PERSONALITY_CONTROVERSY]);
-	printf("  | Imp. Matches:   %2d", attributes[47]);
+	printf("  | Imp. Matches:   %2d", (attributes[47] + 4) / 5);
 
 	printf("\n");
 	printf(".------------------------------------------.------------------------------------------.\n");
 
+	u8 c = 0;
 	for (u8 i = 0; i < ROLE_COUNT; ++i) {
 		const short familiarity = positions[roles[i].positionIndex];
 		if (familiarity >= 10) {
 			double raw = calculateRoleScores(attributes, roles[i].weights);
 			raw -= raw * 0.025 * (20 - familiarity);
-			printf("| %s: %.4g%%\n", roles[i].name, raw);
+			if (!i) {
+				printf("| %s: %.4g%% ", roles[i].name, raw);
+			} else {
+				printf("| %-9s: %.4g%% ", roles[i].name, raw);
+			}
+			++c;
+		}
+
+		if (c == 2 || i == ROLE_COUNT - 1) {
+			printf("\n");
+			c = 0;
 		}
 	}
 }
