@@ -10,7 +10,6 @@
 extern const Role roles[ROLE_COUNT];
 
 // TODO: add option to sort by columns
-// TODO: add Info (can develop quickly, is hot prospect) columns
 void showSquadList(const Context *ctx, WatchList *watchList) {
 	// Get the length of the longest player name
 	// Possibly cache the lengths too so we don't need to do this again
@@ -29,7 +28,7 @@ void showSquadList(const Context *ctx, WatchList *watchList) {
 	for (u8 i = 0; i < longestName + 5; ++i) {
 		printf(" ");
 	}
-	printf(" Age  Ability ");
+	printf(" Age  Ability Inf ");
 	for (u8 i = 0; i < ROLE_COUNT; ++i) {
 		printf("| %s ", roles[i].name);
 		for (u8 j = roles[i].nameLength; j < 6; ++j) {
@@ -49,14 +48,30 @@ void showSquadList(const Context *ctx, WatchList *watchList) {
 
 		u8 ability[3];
 		readFromMemory(ctx->fd, p->address + OFFSET_ABILITY, 3, ability);
+		u8 age = getAge(ctx->fd, p->address, date);
 
-		printf(" %3d ", getAge(ctx->fd, p->address, date));
+		printf(" %3d ", age);
 		printf(" %3d/%3d ", ability[ABILITY_CA], ability[ABILITY_PA]);
+
+		u8 attributes[56];
+		readFromMemory(ctx->fd, p->address + OFFSET_ATTRIBUTES, 54, attributes);
+		u8 personality[8];
+		readFromMemory(ctx->fd, p->address + OFFSET_PERSONALITY, 8, personality);
+
+		const bool canDevelopQuickly = getCanDevelopQuickly(
+			age,
+			attributes[ATTRIBUTES_INJURY_PRONENESS],
+			personality[PERSONALITY_AMBITION],
+			personality[PERSONALITY_PROFESSIONALISM],
+			attributes[ATTRIBUTES_DETERMINATION]
+		);
+		const bool isHotProspect = getIsHotProspect(age, ability[ABILITY_CA]);
+		const char fastLearnerString = canDevelopQuickly ? 'Q' : ' ';
+		const char hotProspectString = isHotProspect ? 'H' : ' ';
+		printf(" %c%c ", hotProspectString, fastLearnerString);
 
 		u8 positions[15];
 		readFromMemory(ctx->fd, p->address + OFFSET_POSITIONS, 15, positions);
-		u8 attributes[56];
-		readFromMemory(ctx->fd, p->address + OFFSET_ATTRIBUTES, 54, attributes);
 
 		for (u8 j = 0; j < ROLE_COUNT; ++j) {
 			const short familiarity = positions[roles[j].positionIndex];
