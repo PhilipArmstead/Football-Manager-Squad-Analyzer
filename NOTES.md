@@ -22,11 +22,20 @@ From the "current screen" static address (0x13FFF0000 on Windows and 0x15DCD9415
 
 ## Mapping person
 
-- Row ID is + 0x08
-- Unique ID is + 0x0C
-- Random ID is + 0x10
-- Date of birth is + 0x44 (2 bytes for day of the year, 2 bytes for year)
-- For non staff players, player data is 632 bytes up from here
+- +0x08 = Row ID
+- +0x0C = Unique ID
+- +0x10 = Random ID
+- +0x44= Date of birth (2 bytes for day of the year, 2 bytes for year)
+- +0x78 = Adaptability
+- +0x79 = Ambition
+- +0x7A = Loyalty
+- +0x7B = Pressure
+- +0x7C = Professionalism
+- +0x7D = Sportsmanship
+- +0x7E = Temperament
+- +0x7F = Controversy
+
+For non staff players, player data is 632 bytes up from here
 
 ## Mapping player
 
@@ -125,17 +134,6 @@ From the "current screen" static address (0x13FFF0000 on Windows and 0x15DCD9415
 - -0x2E = Determination
 - -0x2D = Composure
 - -0x2C = Concentration
-- 0 = base
-- +0x0C = Random ID
-- +0x10 = UID
-- +0x78 = Adaptability
-- +0x79 = Ambition
-- +0x7A = Loyalty
-- +0x7B = Pressure
-- +0x7C = Professionalism
-- +0x7D = Sportsmanship
-- +0x7E = Temperament
-- +0x7F = Controversy
 
 ## Date & time
 
@@ -145,3 +143,21 @@ From the "current screen" static address (0x13FFF0000 on Windows and 0x15DCD9415
 - Year is 2 bytes
 
 e.g. Sunday 12th of May, 2024 at 0800 is `85 12 E8 07`
+
+## Supporter profile
+
+Search for profile distribution as byte array. e.g. `0D 22 17 0C 00 12` representing 13, 34, 23, 12, 0, 18.
+
+- 0x00 social media followers
+- 0x0E hardcore distribution
+- 0x0F core distribution
+- 0x10 family distribution
+- 0x11 fair weather distribution
+- 0x12 corporate distribution
+- 0x13 casual distribution
+- 0x1C supporter loyalty
+- 0x1D supporter passion
+- 0x1E supporter patience
+- 0x1F supporter affluence
+- 0x20 supporter temperament
+- 0x21 supporter expectations

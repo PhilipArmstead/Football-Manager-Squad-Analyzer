@@ -70,7 +70,7 @@ void showTeamList(const int fd, const TeamList *teamList) {
 
 		u8 ability[3];
 		readFromMemory(fd, p->address + OFFSET_ABILITY, 3, ability);
-		u8 age = getAge(fd, p->address, date);
+		const u8 age = getAge(fd, p->address, date);
 
 		printf(" %3d ", age);
 		printf(" %3d/%3d ", ability[ABILITY_CA], ability[ABILITY_PA]);

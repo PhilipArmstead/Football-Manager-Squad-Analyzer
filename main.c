@@ -41,7 +41,9 @@ int main() {
 			break;
 		}
 
-		getchar(); // swallow newline
+		if (c != '\n') {
+			getchar(); // swallow newline
+		}
 
 		switch (c) {
 			case 'l': {

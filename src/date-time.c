@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "date-time.h"
+#include "constants.h"
 #include "maths.h"
 #include "memory.h"
 #include "types.h"
@@ -31,7 +32,6 @@
 #define DAYS_BEFORE_NOVEMBER (DAYS_IN_OCTOBER + DAYS_BEFORE_OCTOBER)
 #define DAYS_BEFORE_DECEMBER (DAYS_IN_NOVEMBER + DAYS_BEFORE_NOVEMBER)
 
-#define POINTER_TO_CURRENT_DATETIME 0x14631D5BC
 
 Date getDate(const int fd) {
 	u8 bytes[4];
