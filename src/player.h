@@ -28,12 +28,12 @@ static inline void getPlayerSurname(const int fd, const unsigned long attributeB
 }
 
 
-static inline bool getIsHotProspect(const u8 age, const u8 currentAbility) {
-	if (age <= 19) {
-		return currentAbility >= 80 + 5 * (age - 15);
+static inline bool getIsHotProspect(const Player *player) {
+	if (player->age <= 19) {
+		return player->ca >= 80 + 5 * (player->age - 15);
 	}
-	if (age <= 23) {
-		return currentAbility >= 140;
+	if (player->age <= 23) {
+		return player->ca >= 140;
 	}
 	return false;
 }

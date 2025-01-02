@@ -9,6 +9,9 @@ typedef unsigned short u16;
 
 typedef struct {
 	unsigned long address;
+	u8 age;
+	u8 ca;
+	u8 pa;
 	u8 nameLength;
 	u8 forename[32];
 	u8 surname[32];

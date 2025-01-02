@@ -16,6 +16,8 @@ void showTeamList(const int fd, const TeamList *teamList) {
 		playerCount += teamList->teams[i].playerCount;
 	}
 
+	u8 longestName = 0;
+	const Date date = getDate(fd);
 	Player players[playerCount];
 	u16 playerIndex = 0;
 	for (u8 i = 0; i < teamList->length; ++i) {
@@ -26,24 +28,28 @@ void showTeamList(const int fd, const TeamList *teamList) {
 			address += 0x08;
 			const unsigned long pAddress = hexBytesToInt(pointer, 4) + 632;
 
-			players[playerIndex] = (Player){pAddress, 0};
+			u8 ability[3];
+			readFromMemory(fd, pAddress + OFFSET_ABILITY, 3, ability);
+
+			players[playerIndex] = (Player){
+				pAddress,
+				getAge(fd, pAddress, date),
+				ability[ABILITY_CA],
+				ability[ABILITY_PA]
+			};
 
 			getPlayerForename(fd, pAddress, players[playerIndex].forename);
 			getPlayerSurname(fd, pAddress, players[playerIndex].surname);
 
-			++playerIndex;
-		}
-	}
+			Player *p = &players[playerIndex];
+			// TODO: diacritics break this
+			p->nameLength = strlen(p->forename) + strlen(p->surname);
+			if (p->nameLength > longestName) {
+				longestName = p->nameLength;
+			}
 
-	// Get the length of the longest player name
-	// Cache the lengths too so we don't need to do this again
-	u8 longestName = 0;
-	for (u16 i = 0; i < playerCount; ++i) {
-		Player *p = &players[i];
-		// TODO: diacritics break this
-		p->nameLength = strlen(p->forename) + strlen(p->surname);
-		if (p->nameLength > longestName) {
-			longestName = p->nameLength;
+			// TODO: cache attributes
+			++playerIndex;
 		}
 	}
 
@@ -59,7 +65,6 @@ void showTeamList(const int fd, const TeamList *teamList) {
 	}
 	printf("\n");
 
-	const Date date = getDate(fd);
 	for (u16 i = 0; i < playerCount; ++i) {
 		Player *p = &players[i];
 
@@ -68,12 +73,8 @@ void showTeamList(const int fd, const TeamList *teamList) {
 			printf(" ");
 		}
 
-		u8 ability[3];
-		readFromMemory(fd, p->address + OFFSET_ABILITY, 3, ability);
-		const u8 age = getAge(fd, p->address, date);
-
-		printf(" %3d ", age);
-		printf(" %3d/%3d ", ability[ABILITY_CA], ability[ABILITY_PA]);
+		printf(" %3d ", p->age);
+		printf(" %3d/%3d ", p->ca, p->pa);
 
 		u8 attributes[56];
 		readFromMemory(fd, p->address + OFFSET_ATTRIBUTES, 54, attributes);
@@ -81,13 +82,13 @@ void showTeamList(const int fd, const TeamList *teamList) {
 		readFromMemory(fd, p->address + OFFSET_PERSONALITY, 8, personality);
 
 		const bool canDevelopQuickly = getCanDevelopQuickly(
-			age,
+			p->age,
 			attributes[ATTRIBUTES_INJURY_PRONENESS],
 			personality[PERSONALITY_AMBITION],
 			personality[PERSONALITY_PROFESSIONALISM],
 			attributes[ATTRIBUTES_DETERMINATION]
 		);
-		const bool isHotProspect = getIsHotProspect(age, ability[ABILITY_CA]);
+		const bool isHotProspect = getIsHotProspect(p);
 		const char fastLearnerString = canDevelopQuickly ? 'Q' : ' ';
 		const char hotProspectString = isHotProspect ? 'H' : ' ';
 		printf(" %c%c ", hotProspectString, fastLearnerString);
@@ -141,32 +142,29 @@ void showPlayerScreen(const int fd) {
 	readFromMemory(fd, attributeBase + OFFSET_PERSONALITY, 8, personality);
 	u8 attributes[56];
 	readFromMemory(fd, attributeBase + OFFSET_ATTRIBUTES, 54, attributes);
-	u8 forename[32];
-	getPlayerForename(fd, attributeBase, forename);
-	u8 surname[32];
-	getPlayerSurname(fd, attributeBase, surname);
-	const u8 age = getAge(fd, attributeBase, getDate(fd));
 
-	printPlayer(ability, attributes, personality, positions, forename, surname, age);
+	Player player = {
+		attributeBase,
+		getAge(fd, attributeBase, getDate(fd)),
+		ability[ABILITY_CA],
+		ability[ABILITY_PA],
+		0
+	};
+	getPlayerForename(fd, attributeBase, player.forename);
+	getPlayerForename(fd, attributeBase, player.surname);
+
+	printPlayer(&player, attributes, personality, positions);
 }
 
-void printPlayer(
-	const u8 ability[3],
-	const u8 attributes[56],
-	const u8 personality[8],
-	const u8 positions[15],
-	const u8 forename[32],
-	const u8 surname[32],
-	const u8 age
-) {
+void printPlayer(const Player *player, const u8 attributes[56], const u8 personality[8], const u8 positions[15]) {
 	const bool canDevelopQuickly = getCanDevelopQuickly(
-		age,
+		player->age,
 		attributes[ATTRIBUTES_INJURY_PRONENESS],
 		personality[PERSONALITY_AMBITION],
 		personality[PERSONALITY_PROFESSIONALISM],
 		attributes[ATTRIBUTES_DETERMINATION]
 	);
-	const bool isHotProspect = getIsHotProspect(age, ability[ABILITY_CA]);
+	const bool isHotProspect = getIsHotProspect(player);
 	char *fastLearnerString = canDevelopQuickly ? "Fast learner  " : "";
 	char *hotProspectString = isHotProspect ? "Hot prospect  " : "";
 
@@ -174,8 +172,8 @@ void printPlayer(
 
 	// TODO: fix positions
 	printf(".------------------------------------------.------------------------------------------.\n");
-	printf("| %s %s (%d yrs): GK, DL/R, ST\n", forename, surname, age);
-	printf("| Ability: %d/%d  %s%s\n", ability[ABILITY_CA], ability[ABILITY_PA], fastLearnerString, hotProspectString);
+	printf("| %s %s (%d yrs): GK, DL/R, ST\n", player->forename, player->surname, player->age);
+	printf("| Ability: %d/%d  %s%s\n", player->ca, player->pa, fastLearnerString, hotProspectString);
 	printf(".------------------------------------------.------------------------------------------.\n");
 
 	printf("| Adaptability:  %2d", personality[PERSONALITY_ADAPTABILITY]);
