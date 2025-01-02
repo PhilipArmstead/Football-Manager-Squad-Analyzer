@@ -17,11 +17,16 @@ typedef struct {
 	u8 nameLength;
 	u8 forename[32];
 	u8 surname[32];
-} WatchedPlayer;
+} Player;
+
+typedef struct {
+	unsigned long address;
+	u8 playerCount;
+} WatchedTeam;
 
 typedef struct {
 	u8 length;
-	WatchedPlayer player[32];
+	WatchedTeam teams[16];
 } WatchList;
 
 typedef struct {

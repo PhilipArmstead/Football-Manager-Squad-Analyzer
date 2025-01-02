@@ -2,9 +2,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <watch-list.h>
 
 #include "analyse.h"
-#include "./src/types.h"
+#include "types.h"
 
 
 int main(const int argc, const char *argv[]) {
@@ -33,51 +34,39 @@ int main(const int argc, const char *argv[]) {
 		}
 	}
 
-	// Searched for 1152962544
-	// unsigned long address = 0x3bc91e00;
-	// for (u8 i = 0; i < 23; ++i) {
-	// 	u8 pointer[4];
-	// 	readFromMemory(ctx->fd, address, 4, pointer);
-	// 	address += 0x08;
-	// 	const unsigned long pAddress = hexBytesToInt(pointer, 4);
-	//
-	// 	u8 forename[32] = {0};
-	// 	getPlayerForename(ctx->fd, pAddress, forename);
-	// 	u8 surname[32] = {0};
-	// 	getPlayerSurname(ctx->fd, pAddress, surname);
-	//
-	// 	printf("%d: %s %s\n", i, forename, surname);
-	// }
-
 	WatchList watchList = {0};
 
 	if (autoShow) {
-		showPlayerScreen(&ctx, &watchList);
+		showPlayerScreen(&ctx);
 	}
 
 	while (1) {
 		printf("\n(s)how player profile\n");
 		if (watchList.length) {
-			printf("(l)ist watched players\n");
+			printf("(l)ist watched teams\n");
 		}
+		printf("(w)atch current team\n");
 		printf("e(x)it\n");
 		const u8 c = getchar();
 		if (c == 'x') {
 			break;
 		}
 
-		if (c == 's') {
-			getchar(); // swallow newline
-			showPlayerScreen(&ctx, &watchList);
-		} else if (c == 'l') {
-			getchar(); // swallow newline
+		getchar(); // swallow newline
+		switch (c) {
+		case 'l': {
 			showSquadList(&ctx, &watchList);
+			break;
+		}
+		case 's': {
+			showPlayerScreen(&ctx);
+			break;
+		}
+		case 'w': {
+			// TODO: ad error checking around this
+			addToWatchList(&ctx, &watchList);
+			break;
+		}
 		}
 	}
-
-	// FILE *f = fopen("./watch-list.txt", "w");
-	// for (u8 i = 0; i < watchList.length; ++i) {
-	// fprintf(f, "%ld\n", watchList.values[i]);
-	// }
-	// fclose(f);
 }

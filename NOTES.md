@@ -26,6 +26,7 @@ From the "current screen" static address (0x13FFF0000 on Windows and 0x15DCD9415
 - Unique ID is + 0x0C
 - Random ID is + 0x10
 - Date of birth is + 0x44 (2 bytes for day of the year, 2 bytes for year)
+- For non staff players, player data is 632 bytes up from here
 
 ## Mapping player
 

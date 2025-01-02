@@ -10,16 +10,38 @@
 extern const Role roles[ROLE_COUNT];
 
 // TODO: add option to sort by columns
-void showSquadList(const Context *ctx, WatchList *watchList) {
-	// Get the length of the longest player name
-	// Possibly cache the lengths too so we don't need to do this again
-	u8 longestName = 0;
+void showSquadList(const Context *ctx, const WatchList *watchList) {
+	u16 playerCount = 0;
 	for (u8 i = 0; i < watchList->length; ++i) {
-		WatchedPlayer *p = &watchList->player[i];
-		if (!p->nameLength) {
-			// TODO: diacritics break this
-			p->nameLength = strlen(p->forename) + strlen(p->surname);
+		playerCount += watchList->teams[i].playerCount;
+	}
+
+	Player players[playerCount];
+	u16 playerIndex = 0;
+	for (u8 i = 0; i < watchList->length; ++i) {
+		unsigned long address = watchList->teams[i].address;
+		for (u8 j = 0; j < watchList->teams[i].playerCount; ++j) {
+			u8 pointer[4];
+			readFromMemory(ctx->fd, address, 4, pointer);
+			address += 0x08;
+			const unsigned long pAddress = hexBytesToInt(pointer, 4) + 632;
+
+			players[playerIndex] = (Player){pAddress, 0};
+
+			getPlayerForename(ctx->fd, pAddress, players[playerIndex].forename);
+			getPlayerSurname(ctx->fd, pAddress, players[playerIndex].surname);
+
+			++playerIndex;
 		}
+	}
+
+	// Get the length of the longest player name
+	// Cache the lengths too so we don't need to do this again
+	u8 longestName = 0;
+	for (u16 i = 0; i < playerCount; ++i) {
+		Player *p = &players[i];
+		// TODO: diacritics break this
+		p->nameLength = strlen(p->forename) + strlen(p->surname);
 		if (p->nameLength > longestName) {
 			longestName = p->nameLength;
 		}
@@ -38,8 +60,8 @@ void showSquadList(const Context *ctx, WatchList *watchList) {
 	printf("\n");
 
 	const Date date = getDate(ctx->fd);
-	for (u8 i = 0; i < watchList->length; ++i) {
-		WatchedPlayer *p = &watchList->player[i];
+	for (u16 i = 0; i < playerCount; ++i) {
+		Player *p = &players[i];
 
 		printf(" %s, %s ", p->surname, p->forename);
 		for (u8 j = p->nameLength; j < longestName + 1; ++j) {
@@ -96,7 +118,7 @@ void showSquadList(const Context *ctx, WatchList *watchList) {
 	}
 }
 
-void showPlayerScreen(const Context *ctx, WatchList *watchList) {
+void showPlayerScreen(const Context *ctx) {
 	// FIXME: this fails to work when the player is also staff
 	u8 bytes[4];
 	readFromMemory(ctx->fd, POINTER_TO_ATTRIBUTES, 4, bytes);
@@ -123,38 +145,9 @@ void showPlayerScreen(const Context *ctx, WatchList *watchList) {
 	getPlayerForename(ctx->fd, attributeBase, forename);
 	u8 surname[32];
 	getPlayerSurname(ctx->fd, attributeBase, surname);
-	u8 age = getAge(ctx->fd, attributeBase, getDate(ctx->fd));
+	const u8 age = getAge(ctx->fd, attributeBase, getDate(ctx->fd));
 
 	printPlayer(ability, attributes, personality, positions, forename, surname, age);
-
-	u8 watchIndex;
-	bool isBeingWatched = false;
-	for (u8 i = 0; i < watchList->length; ++i) {
-		if (watchList->player[i].address < i) {
-			continue;
-		}
-
-		if (watchList->player[i].address == attributeBase) {
-			watchIndex = i;
-			isBeingWatched = true;
-		}
-
-		break;
-	}
-
-	// TODO: don't offer to watch if the list is full
-	// TODO: make a linked list?
-	printf(isBeingWatched ? "Un(w)atch player? " : "(w)atch player? ");
-	u8 c;
-	while ((c = getchar()) != '\n' && c != EOF) {
-		if (c == 'w') {
-			if (isBeingWatched) {
-				removeFromWatchList(watchList, watchIndex);
-			} else {
-				addToWatchList(ctx, attributeBase, watchList);
-			}
-		}
-	}
 }
 
 void printPlayer(
