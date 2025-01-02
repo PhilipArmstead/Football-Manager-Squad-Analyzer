@@ -8,41 +8,30 @@
 #include "types.h"
 
 
-int main(const int argc, const char *argv[]) {
-	// Get process ID for game
+int main() {
 	FILE *fp = popen("pidof 'Main Thread'", "r");
 	char path[64];
 	fgets(path, sizeof(path), fp);
 	const long pid = strtol(path, NULL, 10);
 	fclose(fp);
-
-	// Get file descriptor for process's memory
-	char memoryPath[32];
-	sprintf(memoryPath, "/proc/%ld/mem", pid);
-	Context ctx = {open(memoryPath, O_RDWR), 0};
-	if (ctx.fd == -1) {
-		printf("Could not open %s\n", memoryPath);
+	if (!pid) {
+		printf("Couldn't find process; is it running?\n");
 		exit(1);
 	}
 
-	// Parse command line args
-	bool autoShow = false;
-	for (unsigned int i = 1; i < argc; i++) {
-		if (strcmp(argv[i], "-s") == 0) {
-			autoShow = true;
-			break;
-		}
+	char memoryPath[32];
+	sprintf(memoryPath, "/proc/%ld/mem", pid);
+	const int fd = open(memoryPath, O_RDWR);
+	if (fd == -1) {
+		printf("Couldn't open %s\n", memoryPath);
+		exit(2);
 	}
 
-	WatchList watchList = {0};
-
-	if (autoShow) {
-		showPlayerScreen(&ctx);
-	}
-
+	TeamList teamList = {0};
 	while (1) {
-		printf("\n(s)how player profile\n");
-		if (watchList.length) {
+		printf("\nshow current (p)layer\n");
+		printf("show current (t)eam\n");
+		if (teamList.length) {
 			printf("(l)ist watched teams\n");
 		}
 		printf("(w)atch current team\n");
@@ -53,20 +42,31 @@ int main(const int argc, const char *argv[]) {
 		}
 
 		getchar(); // swallow newline
+
 		switch (c) {
-		case 'l': {
-			showSquadList(&ctx, &watchList);
-			break;
-		}
-		case 's': {
-			showPlayerScreen(&ctx);
-			break;
-		}
-		case 'w': {
-			// TODO: ad error checking around this
-			addToWatchList(&ctx, &watchList);
-			break;
-		}
+			case 'l': {
+				if (teamList.length) {
+					showTeamList(fd, &teamList);
+				}
+				break;
+			}
+			case 'p': {
+				showPlayerScreen(fd);
+				break;
+			}
+			case 't': {
+				TeamList tmp = {0};
+				addToTeamList(fd, &tmp);
+				showTeamList(fd, &tmp);
+				break;
+			}
+			case 'w': {
+				// TODO: add error checking around this
+				addToTeamList(fd, &teamList);
+				break;
+			}
+			default:
+				break;
 		}
 	}
 }

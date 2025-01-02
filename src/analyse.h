@@ -13,5 +13,5 @@ void printPlayer(
 	u8 age
 );
 float calculateRoleScores(const u8 attributes[54], const u8 weights[54]);
-void showSquadList(const Context *ctx, const WatchList *watchList);
-void showPlayerScreen(const Context *ctx);
+void showTeamList(int fd, const TeamList *teamList);
+void showPlayerScreen(int fd);

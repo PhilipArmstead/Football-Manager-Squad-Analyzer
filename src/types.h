@@ -8,11 +8,6 @@ typedef unsigned short u16;
 #define true 1
 
 typedef struct {
-	int fd;
-	long attributeBase;
-} Context;
-
-typedef struct {
 	unsigned long address;
 	u8 nameLength;
 	u8 forename[32];
@@ -22,12 +17,12 @@ typedef struct {
 typedef struct {
 	unsigned long address;
 	u8 playerCount;
-} WatchedTeam;
+} Team;
 
 typedef struct {
 	u8 length;
-	WatchedTeam teams[16];
-} WatchList;
+	Team teams[16];
+} TeamList;
 
 typedef struct {
 	u16 days;

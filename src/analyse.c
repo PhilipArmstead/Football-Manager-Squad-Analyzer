@@ -10,26 +10,26 @@
 extern const Role roles[ROLE_COUNT];
 
 // TODO: add option to sort by columns
-void showSquadList(const Context *ctx, const WatchList *watchList) {
+void showTeamList(const int fd, const TeamList *teamList) {
 	u16 playerCount = 0;
-	for (u8 i = 0; i < watchList->length; ++i) {
-		playerCount += watchList->teams[i].playerCount;
+	for (u8 i = 0; i < teamList->length; ++i) {
+		playerCount += teamList->teams[i].playerCount;
 	}
 
 	Player players[playerCount];
 	u16 playerIndex = 0;
-	for (u8 i = 0; i < watchList->length; ++i) {
-		unsigned long address = watchList->teams[i].address;
-		for (u8 j = 0; j < watchList->teams[i].playerCount; ++j) {
+	for (u8 i = 0; i < teamList->length; ++i) {
+		unsigned long address = teamList->teams[i].address;
+		for (u8 j = 0; j < teamList->teams[i].playerCount; ++j) {
 			u8 pointer[4];
-			readFromMemory(ctx->fd, address, 4, pointer);
+			readFromMemory(fd, address, 4, pointer);
 			address += 0x08;
 			const unsigned long pAddress = hexBytesToInt(pointer, 4) + 632;
 
 			players[playerIndex] = (Player){pAddress, 0};
 
-			getPlayerForename(ctx->fd, pAddress, players[playerIndex].forename);
-			getPlayerSurname(ctx->fd, pAddress, players[playerIndex].surname);
+			getPlayerForename(fd, pAddress, players[playerIndex].forename);
+			getPlayerSurname(fd, pAddress, players[playerIndex].surname);
 
 			++playerIndex;
 		}
@@ -59,7 +59,7 @@ void showSquadList(const Context *ctx, const WatchList *watchList) {
 	}
 	printf("\n");
 
-	const Date date = getDate(ctx->fd);
+	const Date date = getDate(fd);
 	for (u16 i = 0; i < playerCount; ++i) {
 		Player *p = &players[i];
 
@@ -69,16 +69,16 @@ void showSquadList(const Context *ctx, const WatchList *watchList) {
 		}
 
 		u8 ability[3];
-		readFromMemory(ctx->fd, p->address + OFFSET_ABILITY, 3, ability);
-		u8 age = getAge(ctx->fd, p->address, date);
+		readFromMemory(fd, p->address + OFFSET_ABILITY, 3, ability);
+		u8 age = getAge(fd, p->address, date);
 
 		printf(" %3d ", age);
 		printf(" %3d/%3d ", ability[ABILITY_CA], ability[ABILITY_PA]);
 
 		u8 attributes[56];
-		readFromMemory(ctx->fd, p->address + OFFSET_ATTRIBUTES, 54, attributes);
+		readFromMemory(fd, p->address + OFFSET_ATTRIBUTES, 54, attributes);
 		u8 personality[8];
-		readFromMemory(ctx->fd, p->address + OFFSET_PERSONALITY, 8, personality);
+		readFromMemory(fd, p->address + OFFSET_PERSONALITY, 8, personality);
 
 		const bool canDevelopQuickly = getCanDevelopQuickly(
 			age,
@@ -93,7 +93,7 @@ void showSquadList(const Context *ctx, const WatchList *watchList) {
 		printf(" %c%c ", hotProspectString, fastLearnerString);
 
 		u8 positions[15];
-		readFromMemory(ctx->fd, p->address + OFFSET_POSITIONS, 15, positions);
+		readFromMemory(fd, p->address + OFFSET_POSITIONS, 15, positions);
 
 		for (u8 j = 0; j < ROLE_COUNT; ++j) {
 			const short familiarity = positions[roles[j].positionIndex];
@@ -118,14 +118,14 @@ void showSquadList(const Context *ctx, const WatchList *watchList) {
 	}
 }
 
-void showPlayerScreen(const Context *ctx) {
+void showPlayerScreen(const int fd) {
 	// FIXME: this fails to work when the player is also staff
 	u8 bytes[4];
-	readFromMemory(ctx->fd, POINTER_TO_ATTRIBUTES, 4, bytes);
+	readFromMemory(fd, POINTER_TO_ATTRIBUTES, 4, bytes);
 	const unsigned long attributeBase = hexBytesToInt(bytes, 4);
 
 	u8 positions[15];
-	readFromMemory(ctx->fd, attributeBase + OFFSET_POSITIONS, 15, positions);
+	readFromMemory(fd, attributeBase + OFFSET_POSITIONS, 15, positions);
 
 	// Verify player is valid
 	for (u8 i = 0; i < 15; ++i) {
@@ -136,16 +136,16 @@ void showPlayerScreen(const Context *ctx) {
 	}
 
 	u8 ability[3];
-	readFromMemory(ctx->fd, attributeBase + OFFSET_ABILITY, 3, ability);
+	readFromMemory(fd, attributeBase + OFFSET_ABILITY, 3, ability);
 	u8 personality[8];
-	readFromMemory(ctx->fd, attributeBase + OFFSET_PERSONALITY, 8, personality);
+	readFromMemory(fd, attributeBase + OFFSET_PERSONALITY, 8, personality);
 	u8 attributes[56];
-	readFromMemory(ctx->fd, attributeBase + OFFSET_ATTRIBUTES, 54, attributes);
+	readFromMemory(fd, attributeBase + OFFSET_ATTRIBUTES, 54, attributes);
 	u8 forename[32];
-	getPlayerForename(ctx->fd, attributeBase, forename);
+	getPlayerForename(fd, attributeBase, forename);
 	u8 surname[32];
-	getPlayerSurname(ctx->fd, attributeBase, surname);
-	const u8 age = getAge(ctx->fd, attributeBase, getDate(ctx->fd));
+	getPlayerSurname(fd, attributeBase, surname);
+	const u8 age = getAge(fd, attributeBase, getDate(fd));
 
 	printPlayer(ability, attributes, personality, positions, forename, surname, age);
 }

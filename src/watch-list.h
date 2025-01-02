@@ -3,37 +3,11 @@
 #include "player.h"
 
 
-static inline void removeFromWatchList(WatchList *watchList, const u8 index) {
-	for (u8 i = index; i < watchList->length - 1; ++i) {
-		watchList->teams[i].address = watchList->teams[i + 1].address;
+static inline void removeFromTeamList(TeamList *teamList, const u8 index) {
+	for (u8 i = index; i < teamList->length - 1; ++i) {
+		teamList->teams[i].address = teamList->teams[i + 1].address;
 	}
-	--watchList->length;
+	--teamList->length;
 }
 
-static inline void addToWatchList(const Context *ctx, WatchList *watchList) {
-	unsigned long address = POINTER_TO_CURRENT_TEAM;
-	u8 pointer[4];
-	u8 pointer2[4];
-	readFromMemory(ctx->fd, address, 4, pointer);
-	address = hexBytesToInt(pointer, 4);
-	readFromMemory(ctx->fd, address + 0x38, 4, pointer);
-	readFromMemory(ctx->fd, address + 0x40, 4, pointer2);
-	address = hexBytesToInt(pointer, 4);
-	const u8 playerCount = (hexBytesToInt(pointer2, 4) - address) / 8;
-
-	u8 index = watchList->length;
-	// TODO: we _can_ get this value when we check if this exists in the array initially
-	for (u8 i = 0; i < watchList->length; ++i) {
-		if (watchList->teams[i].address > address) {
-			index = i;
-			break;
-		}
-	}
-
-	for (u8 i = watchList->length; i > index; --i) {
-		watchList->teams[i] = watchList->teams[i - 1];
-	}
-
-	watchList->teams[index] = (WatchedTeam){address, playerCount};
-	++watchList->length;
-}
+void addToTeamList(int fd, TeamList *teamList);
