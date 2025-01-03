@@ -1,4 +1,6 @@
 #include "watch-list.h"
+#include "constants.h"
+#include "memory.h"
 
 
 void addToTeamList(const int fd, TeamList *teamList) {

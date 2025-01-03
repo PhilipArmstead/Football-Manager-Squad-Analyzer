@@ -15,6 +15,11 @@ typedef struct {
 	u8 nameLength;
 	u8 forename[32];
 	u8 surname[32];
+	u8 personality[8];
+	u8 attributes[56];
+	u8 positions[56];
+	bool canDevelopQuickly;
+	bool isHotProspect;
 } Player;
 
 typedef struct {

@@ -2,7 +2,9 @@
 #include <string.h>
 
 #include "analyse.h"
+#include "constants.h"
 #include "date-time.h"
+#include "memory.h"
 #include "roles.h"
 #include "watch-list.h"
 
@@ -28,18 +30,7 @@ void showTeamList(const int fd, const TeamList *teamList) {
 			address += 0x08;
 			const unsigned long pAddress = hexBytesToInt(pointer, 4) + 632;
 
-			u8 ability[3];
-			readFromMemory(fd, pAddress + OFFSET_ABILITY, 3, ability);
-
-			players[playerIndex] = (Player){
-				pAddress,
-				getAge(fd, pAddress, date),
-				ability[ABILITY_CA],
-				ability[ABILITY_PA]
-			};
-
-			getPlayerForename(fd, pAddress, players[playerIndex].forename);
-			getPlayerSurname(fd, pAddress, players[playerIndex].surname);
+			players[playerIndex] = getPlayer(fd, pAddress, date);
 
 			Player *p = &players[playerIndex];
 			// TODO: diacritics break this
@@ -48,7 +39,6 @@ void showTeamList(const int fd, const TeamList *teamList) {
 				longestName = p->nameLength;
 			}
 
-			// TODO: cache attributes
 			++playerIndex;
 		}
 	}
@@ -81,16 +71,8 @@ void showTeamList(const int fd, const TeamList *teamList) {
 		u8 personality[8];
 		readFromMemory(fd, p->address + OFFSET_PERSONALITY, 8, personality);
 
-		const bool canDevelopQuickly = getCanDevelopQuickly(
-			p->age,
-			attributes[ATTRIBUTES_INJURY_PRONENESS],
-			personality[PERSONALITY_AMBITION],
-			personality[PERSONALITY_PROFESSIONALISM],
-			attributes[ATTRIBUTES_DETERMINATION]
-		);
-		const bool isHotProspect = getIsHotProspect(p);
-		const char fastLearnerString = canDevelopQuickly ? 'Q' : ' ';
-		const char hotProspectString = isHotProspect ? 'H' : ' ';
+		const char fastLearnerString = p->canDevelopQuickly ? 'Q' : ' ';
+		const char hotProspectString = p->isHotProspect ? 'H' : ' ';
 		printf(" %c%c ", hotProspectString, fastLearnerString);
 
 		u8 positions[15];
@@ -120,85 +102,49 @@ void showTeamList(const int fd, const TeamList *teamList) {
 }
 
 void showPlayerScreen(const int fd) {
-	// FIXME: this fails to work when the player is also staff
 	u8 bytes[4];
 	readFromMemory(fd, POINTER_TO_ATTRIBUTES, 4, bytes);
 	const unsigned long attributeBase = hexBytesToInt(bytes, 4);
+	const Player player = getPlayer(fd, attributeBase, getDate(fd));
 
-	u8 positions[15];
-	readFromMemory(fd, attributeBase + OFFSET_POSITIONS, 15, positions);
-
-	// Verify player is valid
-	for (u8 i = 0; i < 15; ++i) {
-		if (positions[i] > 20) {
-			printf("Cannot see player.\n");
-			return;
-		}
-	}
-
-	u8 ability[3];
-	readFromMemory(fd, attributeBase + OFFSET_ABILITY, 3, ability);
-	u8 personality[8];
-	readFromMemory(fd, attributeBase + OFFSET_PERSONALITY, 8, personality);
-	u8 attributes[56];
-	readFromMemory(fd, attributeBase + OFFSET_ATTRIBUTES, 54, attributes);
-
-	Player player = {
-		attributeBase,
-		getAge(fd, attributeBase, getDate(fd)),
-		ability[ABILITY_CA],
-		ability[ABILITY_PA],
-		0
-	};
-	getPlayerForename(fd, attributeBase, player.forename);
-	getPlayerForename(fd, attributeBase, player.surname);
-
-	printPlayer(&player, attributes, personality, positions);
+	printPlayer(&player);
 }
 
-void printPlayer(const Player *player, const u8 attributes[56], const u8 personality[8], const u8 positions[15]) {
-	const bool canDevelopQuickly = getCanDevelopQuickly(
-		player->age,
-		attributes[ATTRIBUTES_INJURY_PRONENESS],
-		personality[PERSONALITY_AMBITION],
-		personality[PERSONALITY_PROFESSIONALISM],
-		attributes[ATTRIBUTES_DETERMINATION]
-	);
-	const bool isHotProspect = getIsHotProspect(player);
-	char *fastLearnerString = canDevelopQuickly ? "Fast learner  " : "";
-	char *hotProspectString = isHotProspect ? "Hot prospect  " : "";
+void printPlayer(const Player *p) {
+	char *fastLearnerString = p->canDevelopQuickly ? "Fast learner  " : "";
+	char *hotProspectString = p->isHotProspect ? "Hot prospect  " : "";
 
 	printf("\n\n\n\n\n\n\n\n");
 
 	// TODO: fix positions
 	printf(".------------------------------------------.------------------------------------------.\n");
-	printf("| %s %s (%d yrs): GK, DL/R, ST\n", player->forename, player->surname, player->age);
-	printf("| Ability: %d/%d  %s%s\n", player->ca, player->pa, fastLearnerString, hotProspectString);
+	printf("| %s %s (%d yrs): GK, DL/R, ST\n", p->forename, p->surname, p->age);
+	printf("| Ability: %d/%d  %s%s\n", p->ca, p->pa, fastLearnerString, hotProspectString);
 	printf(".------------------------------------------.------------------------------------------.\n");
 
-	printf("| Adaptability:  %2d", personality[PERSONALITY_ADAPTABILITY]);
-	printf("  Professionalism:  %2d", personality[PERSONALITY_PROFESSIONALISM]);
-	printf("  | Consistency:    %2d", (attributes[44] + 4) / 5);
-	printf("  Injury proneness:  %2d", (attributes[48] + 4) / 5);
-	printf("\n| Ambition:      %2d", personality[PERSONALITY_AMBITION]);
-	printf("  Sportsmanship:    %2d", personality[PERSONALITY_SPORTSMANSHIP]);
-	printf("  | Determination:  %2d", (attributes[51] + 4) / 5);
-	printf("  Versatility:       %2d", (attributes[49] + 4) / 5);
-	printf("\n| Loyalty:       %2d", personality[PERSONALITY_LOYALTY]);
-	printf("  Temperament:      %2d", personality[PERSONALITY_TEMPERAMENT]);
-	printf("  | Dirtiness:      %2d", (attributes[41] + 4) / 5);
-	printf("\n| Pressure:      %2d", personality[PERSONALITY_PRESSURE]);
-	printf("  Controversy:      %2d", personality[PERSONALITY_CONTROVERSY]);
-	printf("  | Imp. Matches:   %2d", (attributes[47] + 4) / 5);
+	printf("| Adaptability:  %2d", p->personality[PERSONALITY_ADAPTABILITY]);
+	printf("  Professionalism:  %2d", p->personality[PERSONALITY_PROFESSIONALISM]);
+	printf("  | Consistency:    %2d", (p->attributes[44] + 4) / 5);
+	printf("  Injury proneness:  %2d", (p->attributes[48] + 4) / 5);
+	printf("\n| Ambition:      %2d", p->personality[PERSONALITY_AMBITION]);
+	printf("  Sportsmanship:    %2d", p->personality[PERSONALITY_SPORTSMANSHIP]);
+	printf("  | Determination:  %2d", (p->attributes[51] + 4) / 5);
+	printf("  Versatility:       %2d", (p->attributes[49] + 4) / 5);
+	printf("\n| Loyalty:       %2d", p->personality[PERSONALITY_LOYALTY]);
+	printf("  Temperament:      %2d", p->personality[PERSONALITY_TEMPERAMENT]);
+	printf("  | Dirtiness:      %2d", (p->attributes[41] + 4) / 5);
+	printf("\n| Pressure:      %2d", p->personality[PERSONALITY_PRESSURE]);
+	printf("  Controversy:      %2d", p->personality[PERSONALITY_CONTROVERSY]);
+	printf("  | Imp. Matches:   %2d", (p->attributes[47] + 4) / 5);
 
 	printf("\n");
 	printf(".------------------------------------------.------------------------------------------.\n");
 
 	u8 c = 0;
 	for (u8 i = 0; i < ROLE_COUNT; ++i) {
-		const short familiarity = positions[roles[i].positionIndex];
+		const short familiarity = p->positions[roles[i].positionIndex];
 		if (familiarity >= 10) {
-			double raw = calculateRoleScores(attributes, roles[i].weights);
+			double raw = calculateRoleScores(p->attributes, roles[i].weights);
 			raw -= raw * 0.025 * (20 - familiarity);
 			if (!i) {
 				printf("| %s: %.4g%% ", roles[i].name, raw);
