@@ -1,7 +1,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include <time.h>
 #include <watch-list.h>
 
 #include "analyse.h"
@@ -26,6 +26,8 @@ int main() {
 		printf("Couldn't open %s\n", memoryPath);
 		exit(2);
 	}
+
+	srand(time(NULL));
 
 	TeamList teamList = {0};
 	while (1) {

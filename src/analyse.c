@@ -105,152 +105,35 @@ void showPlayerScreen(const int fd) {
 	u8 bytes[4];
 	readFromMemory(fd, POINTER_TO_ATTRIBUTES, 4, bytes);
 	const unsigned long attributeBase = hexBytesToInt(bytes, 4);
-	const Player player = getPlayer(fd, attributeBase, getDate(fd));
+	Player player = getPlayer(fd, attributeBase, getDate(fd));
 
-	printPlayer(&player);
-}
+	while (true) {
+		printPlayer(&player);
 
-static inline void printPlayerPositions(const Player *p) {
-	bool canPlaySomewhereElse = false;
-	if (p->positions[0] > 9) {
-		printf("GK");
-		canPlaySomewhereElse = true;
-	}
-	if (p->positions[1] > 9) {
-		if (canPlaySomewhereElse) {
-			printf(", ");
+		u8 c = '\n';
+		if (isPlayerValid(fd, player.address)) {
+			printf("\nMake (w)onderkid\n");
+			printf("(d)estroy player\n");
+			printf("Press anything else to return\n");
+			c = getchar();
 		}
-		printf("SW");
-		canPlaySomewhereElse = true;
-	}
-	bool canPlayOnThisRow = false;
-	if (p->positions[2] > 9) {
-		if (canPlaySomewhereElse) {
-			printf(", ");
+
+		const u8 a = c;
+
+		// swallow newline
+		while (c != '\n') {
+			c = getchar();
 		}
-		printf("DL");
-		canPlaySomewhereElse = true;
-		canPlayOnThisRow = true;
-	}
-	if (p->positions[3] > 9) {
-		if (canPlayOnThisRow) {
-			printf("/C");
+
+		if (a == 'w') {
+			makeWonderkid(fd, player.address);
+			player = getPlayer(fd, attributeBase, getDate(fd));
+		} else if (a == 'd') {
+			destroyPlayer(fd, player.address);
+			player = getPlayer(fd, attributeBase, getDate(fd));
 		} else {
-			if (canPlaySomewhereElse) {
-				printf(", ");
-			}
-			printf("DC");
+			break;
 		}
-		canPlaySomewhereElse = true;
-		canPlayOnThisRow = true;
-	}
-	if (p->positions[4] > 9) {
-		if (canPlayOnThisRow) {
-			printf("/R");
-		} else {
-			if (canPlaySomewhereElse) {
-				printf(", ");
-			}
-			printf("DR");
-		}
-		canPlaySomewhereElse = true;
-	}
-	canPlayOnThisRow = false;
-	if (p->positions[13] > 9) {
-		if (canPlaySomewhereElse) {
-			printf(", ");
-		}
-		printf("WBL");
-		canPlaySomewhereElse = true;
-		canPlayOnThisRow = true;
-	}
-	if (p->positions[14] > 9) {
-		if (canPlayOnThisRow) {
-			printf("/R");
-		} else {
-			if (canPlaySomewhereElse) {
-				printf(", ");
-			}
-			printf("WBR");
-		}
-		canPlaySomewhereElse = true;
-	}
-	if (p->positions[5] > 9) {
-		if (canPlaySomewhereElse) {
-			printf(", ");
-		}
-		printf("DM");
-		canPlaySomewhereElse = true;
-	}
-	canPlayOnThisRow = false;
-	if (p->positions[6] > 9) {
-		if (canPlaySomewhereElse) {
-			printf(", ");
-		}
-		printf("ML");
-		canPlaySomewhereElse = true;
-		canPlayOnThisRow = true;
-	}
-	if (p->positions[7] > 9) {
-		if (canPlayOnThisRow) {
-			printf("/C");
-		} else {
-			if (canPlaySomewhereElse) {
-				printf(", ");
-			}
-			printf("MC");
-		}
-		canPlaySomewhereElse = true;
-		canPlayOnThisRow = true;
-	}
-	if (p->positions[8] > 9) {
-		if (canPlayOnThisRow) {
-			printf("/R");
-		} else {
-			if (canPlaySomewhereElse) {
-				printf(", ");
-			}
-			printf("MR");
-		}
-		canPlaySomewhereElse = true;
-	}
-	canPlayOnThisRow = false;
-	if (p->positions[9] > 9) {
-		if (canPlaySomewhereElse) {
-			printf(", ");
-		}
-		printf("AML");
-		canPlaySomewhereElse = true;
-		canPlayOnThisRow = true;
-	}
-	if (p->positions[10] > 9) {
-		if (canPlayOnThisRow) {
-			printf("/C");
-		} else {
-			if (canPlaySomewhereElse) {
-				printf(", ");
-			}
-			printf("AMC");
-		}
-		canPlaySomewhereElse = true;
-		canPlayOnThisRow = true;
-	}
-	if (p->positions[11] > 9) {
-		if (canPlayOnThisRow) {
-			printf("/R");
-		} else {
-			if (canPlaySomewhereElse) {
-				printf(", ");
-			}
-			printf("AMR");
-		}
-		canPlaySomewhereElse = true;
-	}
-	if (p->positions[12] > 9) {
-		if (canPlaySomewhereElse) {
-			printf(", ");
-		}
-		printf("ST");
 	}
 }
 

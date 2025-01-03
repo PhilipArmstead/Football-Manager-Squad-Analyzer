@@ -73,3 +73,20 @@ Player getPlayer(const int fd, const unsigned long address, const Date date) {
 
 	return player;
 }
+
+bool isPlayerValid(const int fd, const unsigned long address) {
+	for (u8 i = 0; i < 5; ++i) {
+		const u8 attribute = readByte(fd, address + OFFSET_HIDDEN_ATTRIBUTES + i);
+		if (!attribute || attribute > 100) {
+			return false;
+		}
+	}
+	for (u8 i = 0; i < 8; ++i) {
+		const u8 attribute = readByte(fd, address + OFFSET_PERSONALITY + i);
+		if (!attribute || attribute > 20) {
+			return false;
+		}
+	}
+
+	return true;
+}

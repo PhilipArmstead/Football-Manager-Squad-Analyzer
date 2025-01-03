@@ -8,6 +8,14 @@ static inline void readFromMemory(const int fd, const unsigned long address, con
 	read(fd, bytes, length);
 }
 
+static inline u8 readByte(const int fd, const unsigned long address) {
+	u8 byte;
+	lseek(fd, address, SEEK_SET);
+	read(fd, &byte, 1);
+
+	return byte;
+}
+
 static inline void writeToMemory(
 	const int fd,
 	const unsigned long address,
