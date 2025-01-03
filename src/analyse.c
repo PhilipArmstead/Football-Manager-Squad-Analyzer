@@ -110,15 +110,161 @@ void showPlayerScreen(const int fd) {
 	printPlayer(&player);
 }
 
+static inline void printPlayerPositions(const Player *p) {
+	bool canPlaySomewhereElse = false;
+	if (p->positions[0] > 9) {
+		printf("GK");
+		canPlaySomewhereElse = true;
+	}
+	if (p->positions[1] > 9) {
+		if (canPlaySomewhereElse) {
+			printf(", ");
+		}
+		printf("SW");
+		canPlaySomewhereElse = true;
+	}
+	bool canPlayOnThisRow = false;
+	if (p->positions[2] > 9) {
+		if (canPlaySomewhereElse) {
+			printf(", ");
+		}
+		printf("DL");
+		canPlaySomewhereElse = true;
+		canPlayOnThisRow = true;
+	}
+	if (p->positions[3] > 9) {
+		if (canPlayOnThisRow) {
+			printf("/C");
+		} else {
+			if (canPlaySomewhereElse) {
+				printf(", ");
+			}
+			printf("DC");
+		}
+		canPlaySomewhereElse = true;
+		canPlayOnThisRow = true;
+	}
+	if (p->positions[4] > 9) {
+		if (canPlayOnThisRow) {
+			printf("/R");
+		} else {
+			if (canPlaySomewhereElse) {
+				printf(", ");
+			}
+			printf("DR");
+		}
+		canPlaySomewhereElse = true;
+	}
+	canPlayOnThisRow = false;
+	if (p->positions[13] > 9) {
+		if (canPlaySomewhereElse) {
+			printf(", ");
+		}
+		printf("WBL");
+		canPlaySomewhereElse = true;
+		canPlayOnThisRow = true;
+	}
+	if (p->positions[14] > 9) {
+		if (canPlayOnThisRow) {
+			printf("/R");
+		} else {
+			if (canPlaySomewhereElse) {
+				printf(", ");
+			}
+			printf("WBR");
+		}
+		canPlaySomewhereElse = true;
+	}
+	if (p->positions[5] > 9) {
+		if (canPlaySomewhereElse) {
+			printf(", ");
+		}
+		printf("DM");
+		canPlaySomewhereElse = true;
+	}
+	canPlayOnThisRow = false;
+	if (p->positions[6] > 9) {
+		if (canPlaySomewhereElse) {
+			printf(", ");
+		}
+		printf("ML");
+		canPlaySomewhereElse = true;
+		canPlayOnThisRow = true;
+	}
+	if (p->positions[7] > 9) {
+		if (canPlayOnThisRow) {
+			printf("/C");
+		} else {
+			if (canPlaySomewhereElse) {
+				printf(", ");
+			}
+			printf("MC");
+		}
+		canPlaySomewhereElse = true;
+		canPlayOnThisRow = true;
+	}
+	if (p->positions[8] > 9) {
+		if (canPlayOnThisRow) {
+			printf("/R");
+		} else {
+			if (canPlaySomewhereElse) {
+				printf(", ");
+			}
+			printf("MR");
+		}
+		canPlaySomewhereElse = true;
+	}
+	canPlayOnThisRow = false;
+	if (p->positions[9] > 9) {
+		if (canPlaySomewhereElse) {
+			printf(", ");
+		}
+		printf("AML");
+		canPlaySomewhereElse = true;
+		canPlayOnThisRow = true;
+	}
+	if (p->positions[10] > 9) {
+		if (canPlayOnThisRow) {
+			printf("/C");
+		} else {
+			if (canPlaySomewhereElse) {
+				printf(", ");
+			}
+			printf("AMC");
+		}
+		canPlaySomewhereElse = true;
+		canPlayOnThisRow = true;
+	}
+	if (p->positions[11] > 9) {
+		if (canPlayOnThisRow) {
+			printf("/R");
+		} else {
+			if (canPlaySomewhereElse) {
+				printf(", ");
+			}
+			printf("AMR");
+		}
+		canPlaySomewhereElse = true;
+	}
+	if (p->positions[12] > 9) {
+		if (canPlaySomewhereElse) {
+			printf(", ");
+		}
+		printf("ST");
+	}
+}
+
 void printPlayer(const Player *p) {
 	char *fastLearnerString = p->canDevelopQuickly ? "Fast learner  " : "";
 	char *hotProspectString = p->isHotProspect ? "Hot prospect  " : "";
 
 	printf("\n\n\n\n\n\n\n\n");
 
-	// TODO: fix positions
 	printf(".------------------------------------------.------------------------------------------.\n");
-	printf("| %s %s (%d yrs): GK, DL/R, ST\n", p->forename, p->surname, p->age);
+	printf("| %s %s (%d yrs): ", p->forename, p->surname, p->age);
+	printPlayerPositions(p);
+	printf("\n");
+
 	printf("| Ability: %d/%d  %s%s\n", p->ca, p->pa, fastLearnerString, hotProspectString);
 	printf(".------------------------------------------.------------------------------------------.\n");
 
