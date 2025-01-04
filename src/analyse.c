@@ -127,10 +127,10 @@ void showPlayerScreen(const int fd) {
 
 		if (a == 'w') {
 			makeWonderkid(fd, player.address);
-			player = getPlayer(fd, attributeBase, getDate(fd));
+			player = getPlayer(fd, player.address, getDate(fd));
 		} else if (a == 'd') {
 			destroyPlayer(fd, player.address);
-			player = getPlayer(fd, attributeBase, getDate(fd));
+			player = getPlayer(fd, player.address, getDate(fd));
 		} else {
 			break;
 		}
