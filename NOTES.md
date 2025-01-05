@@ -22,18 +22,19 @@ From the "current screen" static address (0x13FFF0000 on Windows and 0x15DCD9415
 
 ## Mapping person
 
-- +0x08 = Row ID
-- +0x0C = Unique ID
-- +0x10 = Random ID
-- +0x44= Date of birth (2 bytes for day of the year, 2 bytes for year)
-- +0x78 = Adaptability
-- +0x79 = Ambition
-- +0x7A = Loyalty
-- +0x7B = Pressure
-- +0x7C = Professionalism
-- +0x7D = Sportsmanship
-- +0x7E = Temperament
-- +0x7F = Controversy
+- 0x08 = Row ID
+- 0x0C = Unique ID
+- 0x10 = Random ID
+- 0x44= Date of birth (2 bytes for day of the year, 2 bytes for year)
+- 0x78 = Adaptability
+- 0x79 = Ambition
+- 0x7A = Loyalty
+- 0x7B = Pressure
+- 0x7C = Professionalism
+- 0x7D = Sportsmanship
+- 0x7E = Temperament
+- 0x7F = Controversy
+- 0x200 = Contract pointer
 
 For non staff players, player data is 632 bytes up from here
 
@@ -50,16 +51,26 @@ For non staff players, player data is 632 bytes up from here
 - CA is +0x200
 - PA is +0x202
 - Preferred position is +0x266 (1=right,2=left,3=right/central,4=left/central,5=central,6=right when 2,right/central)
+- 0x328 is a function call run when jadedness changes?
 
 ## Mapping contract
 
-- Job is +0x1C (1 = player, 2 = coach, 3 = player/coach)
-- Weekly wage is +0x18
-- Loyalty bonus is +0x98
-- Agent fees is +0x9C
-- Start date is +0x3C
-- End date is +0x40
-- Contract type is +0xB4 (0 is part time, 1 is full time, 2 is amateur, 3 is youth, 4 is non-contract)
+- 0x08 = Person pointer
+- 0x10 = Club pointer
+- 0x1C = Job (1 = player, 2 = coach, 3 = player/coach)
+- 0x18 = Weekly wage
+- 0x98 = Loyalty bonus
+- 0x9C = Agent fees
+- 0x3C = Start date
+- 0x40 = End date
+- 0xB4 = Contract type (0 is part-time, 1 is full time, 2 is amateur, 3 is youth, 4 is non-contract)
+
+## Mapping club
+
+- 0x08 = Row ID
+- 0x0C = Unique ID
+- 0x0C = Random ID
+- 0x30 = Name pointer (from here, +0xC0, +0x04; short name is +0xC8, +0x04)
 
 ## Mapping attributes
 
