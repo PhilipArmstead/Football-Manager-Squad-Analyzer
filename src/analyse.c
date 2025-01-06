@@ -1,104 +1,20 @@
 #include <stdio.h>
-#include <string.h>
 
 #include "analyse.h"
 #include "constants.h"
 #include "date-time.h"
 #include "memory.h"
+#include "player.h"
 #include "roles.h"
 #include "watch-list.h"
 
 
 extern const Role roles[ROLE_COUNT];
 
-// TODO: add option to sort by columns
 void showTeamList(const int fd, const TeamList *teamList) {
-	u16 playerCount = 0;
-	for (u8 i = 0; i < teamList->length; ++i) {
-		playerCount += teamList->teams[i].playerCount;
-	}
-
-	u8 longestName = 0;
-	const Date date = getDate(fd);
-	Player players[playerCount];
-	u16 playerIndex = 0;
-	for (u8 i = 0; i < teamList->length; ++i) {
-		unsigned long address = teamList->teams[i].address;
-		for (u8 j = 0; j < teamList->teams[i].playerCount; ++j) {
-			u8 pointer[4];
-			readFromMemory(fd, address, 4, pointer);
-			address += 0x08;
-			const unsigned long pAddress = hexBytesToInt(pointer, 4) + 632;
-
-			players[playerIndex] = getPlayer(fd, pAddress, date);
-
-			Player *p = &players[playerIndex];
-			// TODO: diacritics break this
-			p->nameLength = strlen(p->forename) + strlen(p->surname);
-			if (p->nameLength > longestName) {
-				longestName = p->nameLength;
-			}
-
-			++playerIndex;
-		}
-	}
-
-	for (u8 i = 0; i < longestName + 5; ++i) {
-		printf(" ");
-	}
-	printf(" Age  Ability Inf ");
-	for (u8 i = 0; i < ROLE_COUNT; ++i) {
-		printf("| %s ", roles[i].name);
-		for (u8 j = roles[i].nameLength; j < 6; ++j) {
-			printf(" ");
-		}
-	}
-	printf("\n");
-
-	for (u16 i = 0; i < playerCount; ++i) {
-		Player *p = &players[i];
-
-		printf(" %s, %s ", p->surname, p->forename);
-		for (u8 j = p->nameLength; j < longestName + 1; ++j) {
-			printf(" ");
-		}
-
-		printf(" %3d ", p->age);
-		printf(" %3d/%3d ", p->ca, p->pa);
-
-		u8 attributes[56];
-		readFromMemory(fd, p->address + OFFSET_ATTRIBUTES, 54, attributes);
-		u8 personality[8];
-		readFromMemory(fd, p->address + OFFSET_PERSONALITY, 8, personality);
-
-		const char fastLearnerString = p->canDevelopQuickly ? 'Q' : ' ';
-		const char hotProspectString = p->isHotProspect ? 'H' : ' ';
-		printf(" %c%c ", hotProspectString, fastLearnerString);
-
-		u8 positions[15];
-		readFromMemory(fd, p->address + OFFSET_POSITIONS, 15, positions);
-
-		for (u8 j = 0; j < ROLE_COUNT; ++j) {
-			const short familiarity = positions[roles[j].positionIndex];
-			if (familiarity >= 10) {
-				double raw = calculateRoleScores(attributes, roles[j].weights);
-				raw -= raw * 0.025 * (20 - familiarity);
-				char s[8];
-				sprintf(s, "%.4g%%", raw);
-				printf("| %-6s ", s);
-				for (u8 k = 6; k < roles[j].nameLength; ++k) {
-					printf(" ");
-				}
-			} else {
-				printf("|");
-				const u8 min = roles[j].nameLength < 6 ? 6 : roles[j].nameLength;
-				for (u8 k = 0; k < min + 2; ++k) {
-					printf(" ");
-				}
-			}
-		}
-		printf("\n");
-	}
+	const PlayerList playerList = getPlayersFromTeamList(fd, teamList);
+	showPlayerList(fd, playerList);
+	free(playerList.player);
 }
 
 void showPlayerScreen(const int fd) {

@@ -10,6 +10,7 @@
 
 Player getPlayer(int fd, unsigned long address, Date date);
 bool isPlayerValid(int fd, unsigned long address);
+void showPlayerList(int fd, PlayerList playerList);
 
 static inline void makeWonderkid(const int fd, const unsigned long address) {
 	writeToMemory(fd, address + OFFSET_PERSONALITY, 8, (u8[8]){20, 20, 20, 20, 20, 20, 20, 1});

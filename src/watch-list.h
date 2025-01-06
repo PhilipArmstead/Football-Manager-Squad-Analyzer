@@ -11,3 +11,4 @@ static inline void removeFromTeamList(TeamList *teamList, const u8 index) {
 }
 
 void addToTeamList(int fd, TeamList *teamList);
+PlayerList getPlayersFromTeamList(int fd, const TeamList *teamList);
