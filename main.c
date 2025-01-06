@@ -2,10 +2,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <watch-list.h>
 
 #include "analyse.h"
 #include "types.h"
+#include "watch-list.h"
+#include "wonderkid.h"
 
 
 int main() {
@@ -31,12 +32,14 @@ int main() {
 
 	TeamList teamList = {0};
 	while (1) {
-		printf("\nshow current (p)layer\n");
+		printf("\n");
+		printf("show current (p)layer\n");
 		printf("show current (t)eam\n");
 		if (teamList.length) {
 			printf("(l)ist watched teams\n");
 		}
 		printf("(w)atch current team\n");
+		printf("(f)ind wonderkids\n");
 		printf("e(x)it\n");
 		const u8 c = getchar();
 		if (c == 'x') {
@@ -48,6 +51,10 @@ int main() {
 		}
 
 		switch (c) {
+			case 'f': {
+				showWonderkids(fd);
+				break;
+			}
 			case 'l': {
 				if (teamList.length) {
 					showTeamList(fd, &teamList);

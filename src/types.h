@@ -23,6 +23,12 @@ typedef struct {
 } Player;
 
 typedef struct {
+	Player *player;
+	int playerCount;
+	int capacity;
+} PlayerList;
+
+typedef struct {
 	unsigned long address;
 	u8 playerCount;
 } Team;
