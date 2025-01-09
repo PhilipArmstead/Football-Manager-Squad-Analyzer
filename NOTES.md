@@ -10,16 +10,6 @@ From the "current screen" static address (0x13FFF0000 on Windows and 0x15DCD9415
 - current staff member is + 0x80
 - current team is + 0x88
 
-## Mapping Team
-
-- Row ID is +0x08
-- Unique ID is +0x0C
-- Random ID is +0x10
-- Team type is +0x28 (0 for first team, 1 for reserves, 0x0C for U18)
-- Pointer to array of players(??) is +0x38
-- Pointer to end of array of players(??) is +0x40
-- Reputation is +0xA8
-
 ## Mapping person
 
 - 0x08 = Row ID
@@ -34,7 +24,7 @@ From the "current screen" static address (0x13FFF0000 on Windows and 0x15DCD9415
 - 0x7D = Sportsmanship
 - 0x7E = Temperament
 - 0x7F = Controversy
-- 0x200 = Contract pointer
+- 0xC8 = Contract pointer
 
 For non staff players, player data is 632 bytes up from here
 
@@ -57,20 +47,37 @@ For non staff players, player data is 632 bytes up from here
 
 - 0x08 = Person pointer
 - 0x10 = Club pointer
-- 0x1C = Job (1 = player, 2 = coach, 3 = player/coach)
 - 0x18 = Weekly wage
-- 0x98 = Loyalty bonus
-- 0x9C = Agent fees
+- 0x1C = Job (1 = player, 2 = coach, 3 = player/coach)
+- 0x30 = Loyalty bonus
 - 0x3C = Start date
 - 0x40 = End date
+- 0x9C = Agent fees?
 - 0xB4 = Contract type (0 is part-time, 1 is full time, 2 is amateur, 3 is youth, 4 is non-contract)
 
 ## Mapping club
 
 - 0x08 = Row ID
 - 0x0C = Unique ID
-- 0x0C = Random ID
-- 0x30 = Name pointer (from here, +0xC0, +0x04; short name is +0xC8, +0x04)
+- 0x10 = Random ID
+- 0x30 = Name/teams? pointer
+
+## Mapping Team
+
+- Row ID is +0x08
+- Unique ID is +0x0C
+- Random ID is +0x10
+- Team type is +0x28 (0 for first team, 1 for reserves, 0x0C for U18)
+- 0x30 = Name/teams? pointer
+- Pointer to array of players(??) is +0x38
+- Pointer to end of array of players(??) is +0x40
+- Reputation is +0xA8
+
+## Mapping name/teams?
+
+- 0x18 = squad list pointer
+- 0xC0 = long name (+ 0x04 from here)
+- 0xC8 = short name (+ 0x04 from here)
 
 ## Mapping attributes
 
