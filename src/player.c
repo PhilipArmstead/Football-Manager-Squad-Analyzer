@@ -1,11 +1,9 @@
 #include "player.h"
-
-#include <string.h>
-
 #include "analyse.h"
 #include "constants.h"
 #include "maths.h"
 #include "memory.h"
+#include "strings.h"
 #include "roles.h"
 
 
@@ -88,17 +86,16 @@ void showPlayerList(const int fd, const PlayerList playerList) {
 	u8 longestName = 0;
 	for (unsigned int i = 0; i < playerList.playerCount; ++i) {
 		Player *p = &playerList.player[i];
-		// TODO: diacritics break this
-		p->nameLength = strlen(p->forename) + strlen(p->surname);
+		p->nameLength = getNameLength(p->forename, p->surname);
 		if (p->nameLength > longestName) {
 			longestName = p->nameLength;
 		}
 	}
 
-	for (u8 i = 0; i < longestName + 5; ++i) {
+	for (u8 i = 0; i < longestName + 4; ++i) {
 		printf(" ");
 	}
-	printf(" Age  Ability Inf ");
+	printf("Age  Ability Inf ");
 
 	for (u8 i = 0; i < ROLE_COUNT; ++i) {
 		printf("| %s ", roles[i].name);
@@ -111,7 +108,7 @@ void showPlayerList(const int fd, const PlayerList playerList) {
 	for (unsigned int i = 0; i < playerList.playerCount; ++i) {
 		Player *p = &playerList.player[i];
 
-		printf(" %s %s ", p->forename, p->surname);
+		printf(" %s %s", p->forename, p->surname);
 		for (u8 j = p->nameLength; j < longestName + 1; ++j) {
 			printf(" ");
 		}

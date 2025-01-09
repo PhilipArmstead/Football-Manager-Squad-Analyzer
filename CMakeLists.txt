@@ -11,6 +11,7 @@ add_executable(
 	src/analyse.c
 	src/date-time.c
 	src/player.c
+	src/strings.c
 	src/watch-list.c
 	src/wonderkid.c
 	src/roles/roles.c

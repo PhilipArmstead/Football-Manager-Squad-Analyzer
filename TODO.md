@@ -6,5 +6,4 @@ TODO
 - Get player/staff details from person object
 - Add error checking around adding team to watch list
 - Sort team list by columns
-- Diacritics break name width check
 - Fix offsets to work from player/person objects, not solely person
