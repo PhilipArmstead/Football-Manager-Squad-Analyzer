@@ -46,7 +46,6 @@ void showWonderkids(const int fd) {
 		if (playerList.playerCount == playerList.capacity) {
 			Player *tmp = realloc(playerList.player, playerList.capacity * 2);
 			if (tmp != NULL) {
-				free(playerList.player);
 				playerList.player = tmp;
 				playerList.capacity *= 2;
 			}
