@@ -43,6 +43,41 @@ For non staff players, player data is 632 bytes up from here
 - Preferred position is +0x266 (1=right,2=left,3=right/central,4=left/central,5=central,6=right when 2,right/central)
 - 0x328 is a function call run when jadedness changes?
 
+## Mapping staff
+
+- 0x18 - 0x1B = attributes?
+- 0x1C = Level of discipline
+- 0x1D - 0x23 = attributes?
+- 0x24 = Working with youngsters
+- 0x25 = Determination
+- 0x16 - 0x31 = attributes?
+- 0x32 = Coaching player
+- 0x33 = coaching GK shot stopping
+- 0x34 = Judging CA
+- 0x35 = Judging PA
+- 0x36 = Man management
+- 0x37 = Motivating
+- 0x38 = Physiotherapy
+- 0x39 = Tactical knowledge
+- 0x3A = Coaching attacking
+- 0x3B = Coaching defending
+- 0x3C = Coaching fitness
+- 0x3D = Coaching mental attributes
+- 0x3E = Coaching technical
+- 0x3F = Coaching tactical/non-tactical
+- 0x40 = Coaching dirtiness allowance
+- 0x41 = Coaching GK handling
+- 0x42 = Coaching GK distribution
+- 0x43 = Versatility
+- 0x44 - 0x46 = attributes?
+- 0x47 = Sports science
+- 0x49 = Negotiating
+- 0x4A = Judging staff ability
+- 0x4B = Judging staff ability
+- 0x58 = Pointer to some dates? 2023-2025?
+- 0xD8 = PA
+- 0xD8 = PA
+
 ## Mapping contract
 
 - 0x08 = Person pointer
@@ -64,14 +99,18 @@ For non staff players, player data is 632 bytes up from here
 
 ## Mapping Team
 
-- Row ID is +0x08
-- Unique ID is +0x0C
-- Random ID is +0x10
-- Team type is +0x28 (0 for first team, 1 for reserves, 0x0C for U18)
+The whole object is 0xB8 bytes long
+
+- 0x05 = always 1?
+- 0x08 = Row ID
+- 0x0C = Unique ID
+- 0x10 = Random ID
+- 0x28 = Team type (0 for first team, 1 for reserves, 0x0C for U18, 0x16 for youth intake)
+- 0x29 = 0 for senior, else always 1?
 - 0x30 = Name/teams? pointer
-- Pointer to array of players(??) is +0x38
-- Pointer to end of array of players(??) is +0x40
-- Reputation is +0xA8
+- 0x38 = Pointer to start of players
+- 0x40 = Pointer to end of players
+- 0xA8 = Reputation
 
 ## Mapping name/teams?
 
