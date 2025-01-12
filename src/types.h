@@ -48,11 +48,6 @@ typedef struct {
 } Club;
 
 typedef struct {
-	u8 length;
-	Club clubs[16];
-} ClubList;
-
-typedef struct {
 	u16 days;
 	u16 year;
 } Date;

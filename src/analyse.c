@@ -13,27 +13,18 @@
 
 extern const Role roles[ROLE_COUNT];
 
-void showTeamList(const int fd, const TeamList *teamList) {
-	const PlayerList playerList = getPlayersFromTeamList(fd, teamList);
+void showTeamList(const int fd, const TeamList *teamList, const u8 indexList[5]) {
+	const PlayerList playerList = getPlayersFromTeamList(fd, teamList, indexList);
 	showPlayerList(fd, playerList);
 	free(playerList.player);
 }
 
-void showPlayerScreen(const int fd, ClubList *clubList) {
+void showPlayerScreen(const int fd, Club *watchedClub) {
 	u8 bytes[4];
 	readFromMemory(fd, POINTER_TO_ATTRIBUTES, 4, bytes);
 	const unsigned long attributeBase = hexBytesToInt(bytes, 4);
 	Player player = getPlayer(fd, attributeBase, getDate(fd));
 	Club club = getClubFromPerson(fd, player.address);
-
-	const bool canAddToWatchList = clubList->length < 16;
-	u8 clubListIndex = 255;
-	for (u8 i = 0; i < clubList->length; ++i) {
-		if (club.address == clubList->clubs[i].address) {
-			clubListIndex = i;
-			break;
-		}
-	}
 
 	bool isWaiting = true;
 	while (isWaiting) {
@@ -43,9 +34,9 @@ void showPlayerScreen(const int fd, ClubList *clubList) {
 		if (isPlayerValid(fd, player.address)) {
 			printf("\nMake (w)onderkid\n");
 			printf("(d)estroy player\n");
-			if (clubListIndex != 255) {
+			if (watchedClub->address == club.address) {
 				printf("Un-watch %s (s)quads\n", club.name);
-			} else if (canAddToWatchList) {
+			} else {
 				printf("Watch %s (s)quads\n", club.name);
 			}
 			printf("Press anything else to return\n");
@@ -69,10 +60,10 @@ void showPlayerScreen(const int fd, ClubList *clubList) {
 				player = getPlayer(fd, player.address, getDate(fd));
 				break;
 			case 's':
-				if (clubListIndex != 255) {
-					removeFromClubList(clubList, clubListIndex);
-				} else if (canAddToWatchList) {
-					addToClubList(fd, clubList, club);
+				if (watchedClub->address == club.address) {
+					watchedClub->address = 0;
+				} else {
+					addToClubList(fd, watchedClub, club);
 				}
 
 				isWaiting = false;

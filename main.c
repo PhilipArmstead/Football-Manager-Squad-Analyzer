@@ -31,13 +31,13 @@ int main() {
 
 	srand(time(NULL));
 
-	ClubList clubList = {0};
+	Club watchedClub = {0};
 	while (1) {
 		printf("\n");
 		printf("show current (p)layer\n");
 		printf("show current (t)eam\n");
-		if (clubList.length) {
-			printf("(l)ist watched clubs\n");
+		if (watchedClub.address) {
+			printf("(l)ist %s squads\n", watchedClub.name);
 		}
 		printf("(f)ind wonderkids\n");
 		printf("e(x)it\n");
@@ -56,19 +56,19 @@ int main() {
 				break;
 			}
 			case 'l': {
-				if (clubList.length) {
-					showClubPrompt(fd, &clubList);
+				if (watchedClub.address) {
+					showClubPrompt(fd, &watchedClub);
 				}
 				break;
 			}
 			case 'p': {
-				showPlayerScreen(fd, &clubList);
+				showPlayerScreen(fd, &watchedClub);
 				break;
 			}
 			case 't': {
 				TeamList tmp = {0};
 				addToTeamList(fd, &tmp);
-				showTeamList(fd, &tmp);
+				showTeamList(fd, &tmp, (u8*){0});
 				break;
 			}
 			default:

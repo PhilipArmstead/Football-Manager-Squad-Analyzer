@@ -1,5 +1,7 @@
 #include "watch-list.h"
 
+#include <string.h>
+
 #include "club.h"
 #include "constants.h"
 #include "date-time.h"
@@ -37,8 +39,10 @@ void addToTeamList(const int fd, TeamList *teamList) {
 	++teamList->length;
 }
 
-void addToClubList(const int fd, ClubList *clubList, const Club club) {
-	clubList->clubs[clubList->length] = club;
+void addToClubList(const int fd, Club *watchedClub, const Club club) {
+	watchedClub->address = club.address;
+	strncpy(watchedClub->name, club.name, 32);
+	watchedClub->teamList = club.teamList;
 
 	u8 bytes[4];
 	// TODO: add offset to constants header file
@@ -47,7 +51,6 @@ void addToClubList(const int fd, ClubList *clubList, const Club club) {
 	readFromMemory(fd, squadListAddress, 4, bytes);
 	unsigned long teamAddress = hexBytesToInt(bytes, 4);
 
-	TeamList *teamList = &clubList->clubs[clubList->length].teamList;
 	while (teamAddress) {
 		readFromMemory(fd, teamAddress + 0x38, 4, bytes);
 		const unsigned long playerStartAddress = hexBytesToInt(bytes, 4);
@@ -58,7 +61,7 @@ void addToClubList(const int fd, ClubList *clubList, const Club club) {
 
 			u8 teamType;
 			readFromMemory(fd, teamAddress + 0x28, 1, &teamType);
-			teamList->teams[teamList->length++] = (Team){
+			watchedClub->teamList.teams[watchedClub->teamList.length++] = (Team){
 				playerStartAddress,
 				playerEndAddress - playerStartAddress >> 3,
 				teamType
@@ -69,20 +72,27 @@ void addToClubList(const int fd, ClubList *clubList, const Club club) {
 		readFromMemory(fd, squadListAddress, 4, bytes);
 		teamAddress = hexBytesToInt(bytes, 4);
 	}
-
-	clubList->length++;
 }
 
-PlayerList getPlayersFromTeamList(const int fd, const TeamList *teamList) {
+PlayerList getPlayersFromTeamList(const int fd, const TeamList *teamList, const u8 indexList[5]) {
 	u16 playerCount = 0;
-	for (u8 i = 0; i < teamList->length; ++i) {
+	for (u8 n = 0; n < 5; ++n) {
+		const u8 i = indexList[n];
+		if (i == '\n') {
+			break;
+		}
 		playerCount += teamList->teams[i].playerCount;
 	}
 
 	const Date date = getDate(fd);
 	const PlayerList playerList = {malloc(playerCount * sizeof(Player)), playerCount, playerCount};
 	u16 playerIndex = 0;
-	for (u8 i = 0; i < teamList->length; ++i) {
+	for (u8 n = 0; n < 5; ++n) {
+		const u8 i = indexList[n];
+		if (i == '\n') {
+			break;
+		}
+
 		unsigned long address = teamList->teams[i].address;
 		for (u8 j = 0; j < teamList->teams[i].playerCount; ++j) {
 			u8 pointer[4];
