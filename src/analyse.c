@@ -21,7 +21,7 @@ void showTeamList(const int fd, const TeamList *teamList, const u8 indexList[5])
 
 void showPlayerScreen(const int fd, Club *watchedClub) {
 	u8 bytes[4];
-	readFromMemory(fd, POINTER_TO_ATTRIBUTES, 4, bytes);
+	readFromMemory(fd, POINTER_TO_CURRENT_PERSON, 4, bytes);
 	const unsigned long attributeBase = hexBytesToInt(bytes, 4);
 	Player player = getPlayer(fd, attributeBase, getDate(fd));
 	Club club = getClubFromPerson(fd, player.address);
