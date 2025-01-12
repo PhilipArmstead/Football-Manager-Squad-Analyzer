@@ -8,7 +8,8 @@ typedef unsigned short u16;
 #define true 1
 
 typedef struct {
-	unsigned long address;
+	unsigned long personAddress;
+	unsigned long playerAddress;
 	u8 age;
 	u8 ca;
 	u8 pa;

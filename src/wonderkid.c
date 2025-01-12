@@ -28,21 +28,21 @@ void showWonderkids(const int fd) {
 	readFromMemory(fd, POINTER_TO_ALL_PLAYERS, 4, bytes);
 	const unsigned long allPlayers = hexBytesToInt(bytes, 4);
 	for (unsigned int i = 0; i < playerCount; ++i) {
-		// TODO: fix this offset nonsense; we should use the player base where appropriate
 		readFromMemory(fd, allPlayers + 8 * i, 4, bytes);
-		const unsigned long playersAddress = hexBytesToInt(bytes, 4) + 632;
+		const unsigned long playerAddress = hexBytesToInt(bytes, 4);
+		const unsigned long peronAddress = playerAddress + PLAYER_OFFSET_PERSON;
 		u8 potentialAbility;
-		readFromMemory(fd, playersAddress + OFFSET_ABILITY + 2, 1, &potentialAbility);
+		readFromMemory(fd, playerAddress + PLAYER_OFFSET_ABILITY + 2, 1, &potentialAbility);
 		if (potentialAbility < 160) {
 			continue;
 		}
 
-		const u8 age = getAge(fd, playersAddress, date);
+		const u8 age = getAge(fd, peronAddress, date);
 		if (age >= 20) {
 			continue;
 		}
 
-		playerList.player[playerList.playerCount++] = getPlayer(fd, playersAddress, date);
+		playerList.player[playerList.playerCount++] = getPlayer(fd, peronAddress, playerAddress, date);
 		if (playerList.playerCount == playerList.capacity) {
 			Player *tmp = realloc(playerList.player, playerList.capacity * 2);
 			if (tmp != NULL) {

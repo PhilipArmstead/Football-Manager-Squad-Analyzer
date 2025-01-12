@@ -29,23 +29,23 @@ static inline void getPlayerSurname(const int fd, const unsigned long attributeB
 	getPlayerName(fd, pointer, str);
 }
 
-// FIXME: this fails to work when the player is also staff
-Player getPlayer(const int fd, const unsigned long address, const Date date) {
+Player getPlayer(const int fd, const unsigned long peronAddress, const unsigned long playerAddress, const Date date) {
 	u8 ability[3];
-	readFromMemory(fd, address + OFFSET_ABILITY, 3, ability);
+	readFromMemory(fd, playerAddress + PLAYER_OFFSET_ABILITY, 3, ability);
 
 	Player player = {
-		address,
-		getAge(fd, address, date),
+		peronAddress,
+		playerAddress,
+		getAge(fd, peronAddress, date),
 		ability[ABILITY_CA],
 		ability[ABILITY_PA],
 		0
 	};
-	getPlayerForename(fd, address, player.forename);
-	getPlayerSurname(fd, address, player.surname);
-	readFromMemory(fd, address + OFFSET_PERSONALITY, 8, player.personality);
-	readFromMemory(fd, address + OFFSET_ATTRIBUTES, 54, player.attributes);
-	readFromMemory(fd, address + OFFSET_POSITIONS, 15, player.positions);
+	getPlayerForename(fd, peronAddress, player.forename);
+	getPlayerSurname(fd, peronAddress, player.surname);
+	readFromMemory(fd, peronAddress + OFFSET_PERSONALITY, 8, player.personality);
+	readFromMemory(fd, playerAddress + PLAYER_OFFSET_ATTRIBUTES, 54, player.attributes);
+	readFromMemory(fd, playerAddress + PLAYER_OFFSET_POSITIONS, 15, player.positions);
 
 	player.canDevelopQuickly = player.age <= 23 &&
 		player.attributes[ATTRIBUTES_INJURY_PRONENESS] < 70 &&
@@ -62,22 +62,21 @@ Player getPlayer(const int fd, const unsigned long address, const Date date) {
 	}
 
 	u8 bytes[4];
-	// TODO: add this magic number to constants header file
-	readFromMemory(fd, address + OFFSET_ABILITY - 0x30, 4, bytes);
+	readFromMemory(fd, playerAddress + PLAYER_OFFSET_GUIDE_VALUE, 4, bytes);
 	player.guideValue = hexBytesToInt(bytes, 4);
 
 	return player;
 }
 
-bool isPlayerValid(const int fd, const unsigned long address) {
+bool isPlayerValid(const int fd, const unsigned long personAddress, const unsigned long playerAddress) {
 	for (u8 i = 0; i < 5; ++i) {
-		const u8 attribute = readByte(fd, address + OFFSET_HIDDEN_ATTRIBUTES + i);
+		const u8 attribute = readByte(fd, playerAddress + PLAYER_OFFSET_HIDDEN_ATTRIBUTES + i);
 		if (!attribute || attribute > 100) {
 			return false;
 		}
 	}
 	for (u8 i = 0; i < 8; ++i) {
-		const u8 attribute = readByte(fd, address + OFFSET_PERSONALITY + i);
+		const u8 attribute = readByte(fd, personAddress + OFFSET_PERSONALITY + i);
 		if (!attribute || attribute > 20) {
 			return false;
 		}
@@ -122,16 +121,16 @@ void showPlayerList(const int fd, const PlayerList playerList) {
 		printf(" %3d/%3d ", p->ca, p->pa);
 
 		u8 attributes[56];
-		readFromMemory(fd, p->address + OFFSET_ATTRIBUTES, 54, attributes);
+		readFromMemory(fd, p->personAddress + PLAYER_OFFSET_ATTRIBUTES, 54, attributes);
 		u8 personality[8];
-		readFromMemory(fd, p->address + OFFSET_PERSONALITY, 8, personality);
+		readFromMemory(fd, p->personAddress + OFFSET_PERSONALITY, 8, personality);
 
 		const char fastLearnerString = p->canDevelopQuickly ? 'Q' : ' ';
 		const char hotProspectString = p->isHotProspect ? 'H' : ' ';
 		printf(" %c%c ", hotProspectString, fastLearnerString);
 
 		u8 positions[15];
-		readFromMemory(fd, p->address + OFFSET_POSITIONS, 15, positions);
+		readFromMemory(fd, p->playerAddress + PLAYER_OFFSET_POSITIONS, 15, positions);
 
 		for (u8 j = 0; j < ROLE_COUNT; ++j) {
 			const short familiarity = positions[roles[j].positionIndex];

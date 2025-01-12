@@ -98,9 +98,10 @@ PlayerList getPlayersFromTeamList(const int fd, const TeamList *teamList, const 
 			u8 pointer[4];
 			readFromMemory(fd, address, 4, pointer);
 			address += 0x08;
-			const unsigned long pAddress = hexBytesToInt(pointer, 4) + 632;
+			const unsigned long personAddress = hexBytesToInt(pointer, 4);
+			const unsigned long playerAddress = personAddress + PLAYER_OFFSET_PERSON;
 
-			playerList.player[playerIndex] = getPlayer(fd, pAddress, date);
+			playerList.player[playerIndex] = getPlayer(fd, personAddress, playerAddress, date);
 			++playerIndex;
 		}
 	}

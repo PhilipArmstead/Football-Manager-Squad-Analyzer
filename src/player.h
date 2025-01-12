@@ -8,32 +8,32 @@
 #include "memory.h"
 
 
-Player getPlayer(int fd, unsigned long address, Date date);
-bool isPlayerValid(int fd, unsigned long address);
+Player getPlayer(int fd, unsigned long peronAddress, unsigned long playerAddress, Date date);
+bool isPlayerValid(int fd, unsigned long peronAddress, unsigned long playerAddress);
 void showPlayerList(int fd, PlayerList playerList);
 
-static inline void makeWonderkid(const int fd, const unsigned long address) {
-	writeToMemory(fd, address + OFFSET_PERSONALITY, 8, (u8[8]){20, 20, 20, 20, 20, 20, 20, 1});
-	writeToMemory(fd, address + OFFSET_HIDDEN_ATTRIBUTES, 5, (u8[5]){100, 1, 100, 100, 100});
-	writeToMemory(fd, address + OFFSET_BRAVERY, 1, (u8[1]){100});
-	writeToMemory(fd, address + OFFSET_CONSISTENCY, 1, (u8[1]){100});
-	writeToMemory(fd, address + OFFSET_DIRTINESS, 1, (u8[1]){50});
+static inline void makeWonderkid(const int fd, const unsigned long personAddress, const unsigned long playerAddress) {
+	writeToMemory(fd, personAddress + OFFSET_PERSONALITY, 8, (u8[8]){20, 20, 20, 20, 20, 20, 20, 1});
+	writeToMemory(fd, playerAddress + PLAYER_OFFSET_HIDDEN_ATTRIBUTES, 5, (u8[5]){100, 1, 100, 100, 100});
+	writeToMemory(fd, playerAddress + PLAYER_OFFSET_BRAVERY, 1, (u8[1]){100});
+	writeToMemory(fd, playerAddress + PLAYER_OFFSET_CONSISTENCY, 1, (u8[1]){100});
+	writeToMemory(fd, playerAddress + PLAYER_OFFSET_DIRTINESS, 1, (u8[1]){50});
 
-	const u8 potentialAbility = readByte(fd, address + OFFSET_POTENTIAL_ABILITY);
+	const u8 potentialAbility = readByte(fd, playerAddress + PLAYER_OFFSET_POTENTIAL_ABILITY);
 	if (potentialAbility < 160) {
 		const u8 newAbility = 160 + (rand() % 41);
-		writeToMemory(fd, address + OFFSET_POTENTIAL_ABILITY, 1, (u8[1]){newAbility});
+		writeToMemory(fd, playerAddress + PLAYER_OFFSET_POTENTIAL_ABILITY, 1, (u8[1]){newAbility});
 	}
 }
 
-static inline void destroyPlayer(const int fd, const unsigned long address) {
-	writeToMemory(fd, address + OFFSET_PERSONALITY, 8, (u8[8]){1, 1, 1, 1, 1, 1, 1, 20});
-	writeToMemory(fd, address + OFFSET_HIDDEN_ATTRIBUTES, 5, (u8[5]){1, 100, 1, 1, 1});
-	writeToMemory(fd, address + OFFSET_BRAVERY, 1, (u8[1]){1});
-	writeToMemory(fd, address + OFFSET_CONSISTENCY, 1, (u8[1]){1});
+static inline void destroyPlayer(const int fd, const unsigned long personAddress, const unsigned long playerAddress) {
+	writeToMemory(fd, personAddress + OFFSET_PERSONALITY, 8, (u8[8]){1, 1, 1, 1, 1, 1, 1, 20});
+	writeToMemory(fd, playerAddress + PLAYER_OFFSET_HIDDEN_ATTRIBUTES, 5, (u8[5]){1, 100, 1, 1, 1});
+	writeToMemory(fd, playerAddress + PLAYER_OFFSET_BRAVERY, 1, (u8[1]){1});
+	writeToMemory(fd, playerAddress + PLAYER_OFFSET_CONSISTENCY, 1, (u8[1]){1});
 
-	const u8 currentAbility = readByte(fd, address + OFFSET_ABILITY);
-	writeToMemory(fd, address + OFFSET_POTENTIAL_ABILITY, 1, (u8[1]){currentAbility});
+	const u8 currentAbility = readByte(fd, playerAddress + PLAYER_OFFSET_ABILITY);
+	writeToMemory(fd, playerAddress + PLAYER_OFFSET_POTENTIAL_ABILITY, 1, (u8[1]){currentAbility});
 }
 
 static inline void printPlayerPositions(const Player *p) {

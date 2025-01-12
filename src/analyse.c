@@ -19,19 +19,28 @@ void showTeamList(const int fd, const TeamList *teamList, const u8 indexList[5])
 	free(playerList.player);
 }
 
+// TODO: this doesn't work with free agents
 void showPlayerScreen(const int fd, Club *watchedClub) {
 	u8 bytes[4];
 	readFromMemory(fd, POINTER_TO_CURRENT_PERSON, 4, bytes);
-	const unsigned long attributeBase = hexBytesToInt(bytes, 4);
-	Player player = getPlayer(fd, attributeBase, getDate(fd));
-	Club club = getClubFromPerson(fd, player.address);
+	const unsigned long personAddress = hexBytesToInt(bytes, 4);
+	unsigned long playerAddress = personAddress - 632;
+	readFromMemory(fd, playerAddress, 4, bytes);
+	u8 i = 0;
+	while (i < 100 && !(bytes[0] == 0x98 && bytes[1] == 0xE7 && bytes[2] == 0xC7 && bytes[3] == 0x45)) {
+		playerAddress -= 8;
+		readFromMemory(fd, playerAddress, 4, bytes);
+		++i;
+	}
+	Player player = getPlayer(fd, personAddress, playerAddress, getDate(fd));
+	Club club = getClubFromPerson(fd, player.personAddress);
 
 	bool isWaiting = true;
 	while (isWaiting) {
 		printPlayer(&player);
 
 		u8 c = '\n';
-		if (isPlayerValid(fd, player.address)) {
+		if (isPlayerValid(fd, player.personAddress, player.playerAddress)) {
 			printf("\nMake (w)onderkid\n");
 			printf("(d)estroy player\n");
 			if (watchedClub->address == club.address) {
@@ -52,12 +61,12 @@ void showPlayerScreen(const int fd, Club *watchedClub) {
 
 		switch (a) {
 			case 'w':
-				makeWonderkid(fd, player.address);
-				player = getPlayer(fd, player.address, getDate(fd));
+				makeWonderkid(fd, player.personAddress, player.playerAddress);
+				player = getPlayer(fd, player.personAddress, player.playerAddress, getDate(fd));
 				break;
 			case 'd':
-				destroyPlayer(fd, player.address);
-				player = getPlayer(fd, player.address, getDate(fd));
+				destroyPlayer(fd, player.personAddress, player.playerAddress);
+				player = getPlayer(fd, player.personAddress, player.playerAddress, getDate(fd));
 				break;
 			case 's':
 				if (watchedClub->address == club.address) {

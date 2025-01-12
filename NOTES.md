@@ -26,8 +26,6 @@ From the "current screen" static address (0x13FFF0000 on Windows and 0x15DCD9415
 - 0x7F = Controversy
 - 0xC8 = Contract pointer
 
-For non staff players, player data is 632 bytes up from here
-
 ## Mapping player
 
 - Guide value is +0x1D0
@@ -75,7 +73,7 @@ For non staff players, player data is 632 bytes up from here
 - 0x4A = Judging staff ability
 - 0x4B = Judging staff ability
 - 0x58 = Pointer to some dates? 2023-2025?
-- 0xD8 = PA
+- 0xD6 = CA
 - 0xD8 = PA
 
 ## Mapping contract
