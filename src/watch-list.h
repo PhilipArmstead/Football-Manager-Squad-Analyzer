@@ -3,12 +3,13 @@
 #include "player.h"
 
 
-static inline void removeFromTeamList(TeamList *teamList, const u8 index) {
-	for (u8 i = index; i < teamList->length - 1; ++i) {
-		teamList->teams[i].address = teamList->teams[i + 1].address;
+static inline void removeFromClubList(ClubList *clubList, const u8 index) {
+	for (u8 i = index; i < clubList->length - 1; ++i) {
+		clubList->clubs[i] = clubList->clubs[i + 1];
 	}
-	--teamList->length;
+	--clubList->length;
 }
 
 void addToTeamList(int fd, TeamList *teamList);
+void addToClubList(int fd, ClubList *clubList, Club club);
 PlayerList getPlayersFromTeamList(int fd, const TeamList *teamList);

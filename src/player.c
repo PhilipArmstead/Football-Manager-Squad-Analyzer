@@ -61,6 +61,11 @@ Player getPlayer(const int fd, const unsigned long address, const Date date) {
 		player.isHotProspect = false;
 	}
 
+	u8 bytes[4];
+	// TODO: add this magic number to constants header file
+	readFromMemory(fd, address + OFFSET_ABILITY - 0x30, 4, bytes);
+	player.guideValue = hexBytesToInt(bytes, 4);
+
 	return player;
 }
 

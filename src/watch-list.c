@@ -1,4 +1,6 @@
 #include "watch-list.h"
+
+#include "club.h"
 #include "constants.h"
 #include "date-time.h"
 #include "memory.h"
@@ -28,8 +30,47 @@ void addToTeamList(const int fd, TeamList *teamList) {
 		teamList->teams[i] = teamList->teams[i - 1];
 	}
 
-	teamList->teams[index] = (Team){address, playerCount};
+	teamList->teams[index] = (Team)
+	{
+		address, playerCount
+	};
 	++teamList->length;
+}
+
+void addToClubList(const int fd, ClubList *clubList, const Club club) {
+	clubList->clubs[clubList->length] = club;
+
+	u8 bytes[4];
+	// TODO: add offset to constants header file
+	readFromMemory(fd, club.address + 0x18, 4, bytes);
+	unsigned long squadListAddress = hexBytesToInt(bytes, 4);
+	readFromMemory(fd, squadListAddress, 4, bytes);
+	unsigned long teamAddress = hexBytesToInt(bytes, 4);
+
+	TeamList *teamList = &clubList->clubs[clubList->length].teamList;
+	while (teamAddress) {
+		readFromMemory(fd, teamAddress + 0x38, 4, bytes);
+		const unsigned long playerStartAddress = hexBytesToInt(bytes, 4);
+
+		if (playerStartAddress) {
+			readFromMemory(fd, teamAddress + 0x40, 4, bytes);
+			const unsigned long playerEndAddress = hexBytesToInt(bytes, 4);
+
+			u8 teamType;
+			readFromMemory(fd, teamAddress + 0x28, 1, &teamType);
+			teamList->teams[teamList->length++] = (Team){
+				playerStartAddress,
+				playerEndAddress - playerStartAddress >> 3,
+				teamType
+			};
+		}
+
+		squadListAddress += 8;
+		readFromMemory(fd, squadListAddress, 4, bytes);
+		teamAddress = hexBytesToInt(bytes, 4);
+	}
+
+	clubList->length++;
 }
 
 PlayerList getPlayersFromTeamList(const int fd, const TeamList *teamList) {

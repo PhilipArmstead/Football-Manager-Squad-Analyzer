@@ -1,6 +1,8 @@
 #include <stdio.h>
 
 #include "analyse.h"
+
+#include "club.h"
 #include "constants.h"
 #include "date-time.h"
 #include "memory.h"
@@ -17,19 +19,35 @@ void showTeamList(const int fd, const TeamList *teamList) {
 	free(playerList.player);
 }
 
-void showPlayerScreen(const int fd) {
+void showPlayerScreen(const int fd, ClubList *clubList) {
 	u8 bytes[4];
 	readFromMemory(fd, POINTER_TO_ATTRIBUTES, 4, bytes);
 	const unsigned long attributeBase = hexBytesToInt(bytes, 4);
 	Player player = getPlayer(fd, attributeBase, getDate(fd));
+	Club club = getClubFromPerson(fd, player.address);
 
-	while (true) {
+	const bool canAddToWatchList = clubList->length < 16;
+	u8 clubListIndex = 255;
+	for (u8 i = 0; i < clubList->length; ++i) {
+		if (club.address == clubList->clubs[i].address) {
+			clubListIndex = i;
+			break;
+		}
+	}
+
+	bool isWaiting = true;
+	while (isWaiting) {
 		printPlayer(&player);
 
 		u8 c = '\n';
 		if (isPlayerValid(fd, player.address)) {
 			printf("\nMake (w)onderkid\n");
 			printf("(d)estroy player\n");
+			if (clubListIndex != 255) {
+				printf("Un-watch %s (s)quads\n", club.name);
+			} else if (canAddToWatchList) {
+				printf("Watch %s (s)quads\n", club.name);
+			}
 			printf("Press anything else to return\n");
 			c = getchar();
 		}
@@ -41,14 +59,26 @@ void showPlayerScreen(const int fd) {
 			c = getchar();
 		}
 
-		if (a == 'w') {
-			makeWonderkid(fd, player.address);
-			player = getPlayer(fd, player.address, getDate(fd));
-		} else if (a == 'd') {
-			destroyPlayer(fd, player.address);
-			player = getPlayer(fd, player.address, getDate(fd));
-		} else {
-			break;
+		switch (a) {
+			case 'w':
+				makeWonderkid(fd, player.address);
+				player = getPlayer(fd, player.address, getDate(fd));
+				break;
+			case 'd':
+				destroyPlayer(fd, player.address);
+				player = getPlayer(fd, player.address, getDate(fd));
+				break;
+			case 's':
+				if (clubListIndex != 255) {
+					removeFromClubList(clubList, clubListIndex);
+				} else if (canAddToWatchList) {
+					addToClubList(fd, clubList, club);
+				}
+
+				isWaiting = false;
+				break;
+			default:
+				isWaiting = false;
 		}
 	}
 }
@@ -64,7 +94,8 @@ void printPlayer(const Player *p) {
 	printPlayerPositions(p);
 	printf("\n");
 
-	printf("| Ability: %d/%d  %s%s\n", p->ca, p->pa, fastLearnerString, hotProspectString);
+	printf("| Ability: %d/%d  %s%s ", p->ca, p->pa, fastLearnerString, hotProspectString);
+	printf("| Value: £%d\n", p->guideValue);
 	printf(".------------------------------------------.------------------------------------------.\n");
 
 	printf("| Adaptability:  %2d", p->personality[PERSONALITY_ADAPTABILITY]);
@@ -99,7 +130,7 @@ void printPlayer(const Player *p) {
 			++c;
 		}
 
-		if (c == 2 || i == ROLE_COUNT - 1) {
+		if (c == 3 || i == ROLE_COUNT - 1) {
 			printf("\n");
 			c = 0;
 		}

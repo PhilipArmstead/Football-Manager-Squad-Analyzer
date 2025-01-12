@@ -9,6 +9,7 @@ include_directories(src/roles)
 add_executable(
 	fm_24_squad_analyser
 	src/analyse.c
+	src/club.c
 	src/date-time.c
 	src/player.c
 	src/strings.c

@@ -4,6 +4,7 @@
 #include <time.h>
 
 #include "analyse.h"
+#include "club.h"
 #include "types.h"
 #include "watch-list.h"
 #include "wonderkid.h"
@@ -30,15 +31,14 @@ int main() {
 
 	srand(time(NULL));
 
-	TeamList teamList = {0};
+	ClubList clubList = {0};
 	while (1) {
 		printf("\n");
 		printf("show current (p)layer\n");
 		printf("show current (t)eam\n");
-		if (teamList.length) {
-			printf("(l)ist watched teams\n");
+		if (clubList.length) {
+			printf("(l)ist watched clubs\n");
 		}
-		printf("(w)atch current team\n");
 		printf("(f)ind wonderkids\n");
 		printf("e(x)it\n");
 		const u8 c = getchar();
@@ -56,24 +56,19 @@ int main() {
 				break;
 			}
 			case 'l': {
-				if (teamList.length) {
-					showTeamList(fd, &teamList);
+				if (clubList.length) {
+					showClubPrompt(fd, &clubList);
 				}
 				break;
 			}
 			case 'p': {
-				showPlayerScreen(fd);
+				showPlayerScreen(fd, &clubList);
 				break;
 			}
 			case 't': {
 				TeamList tmp = {0};
 				addToTeamList(fd, &tmp);
 				showTeamList(fd, &tmp);
-				break;
-			}
-			case 'w': {
-				// TODO: add error checking around this
-				addToTeamList(fd, &teamList);
 				break;
 			}
 			default:

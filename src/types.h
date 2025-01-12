@@ -20,6 +20,8 @@ typedef struct {
 	u8 positions[56];
 	bool canDevelopQuickly;
 	bool isHotProspect;
+	unsigned int guideValue;
+	unsigned int annualWage;
 } Player;
 
 typedef struct {
@@ -31,12 +33,24 @@ typedef struct {
 typedef struct {
 	unsigned long address;
 	u8 playerCount;
+	u8 teamType;
 } Team;
 
 typedef struct {
 	u8 length;
-	Team teams[16];
+	Team teams[5];
 } TeamList;
+
+typedef struct {
+	unsigned long address;
+	TeamList teamList;
+	u8 name[32];
+} Club;
+
+typedef struct {
+	u8 length;
+	Club clubs[16];
+} ClubList;
 
 typedef struct {
 	u16 days;
