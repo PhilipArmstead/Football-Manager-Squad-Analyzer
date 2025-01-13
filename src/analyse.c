@@ -21,16 +21,14 @@ void showTeamList(const int fd, const TeamList *teamList, const u8 indexList[5])
 
 // TODO: this doesn't work with free agents
 void showPlayerScreen(const int fd, Club *watchedClub) {
-	u8 bytes[4];
+	u8 bytes[5];
 	readFromMemory(fd, POINTER_TO_CURRENT_PERSON, 4, bytes);
 	const unsigned long personAddress = hexBytesToInt(bytes, 4);
-	unsigned long playerAddress = personAddress - 632;
-	readFromMemory(fd, playerAddress, 4, bytes);
-	u8 i = 0;
-	while (i < 100 && !(bytes[0] == 0x98 && bytes[1] == 0xE7 && bytes[2] == 0xC7 && bytes[3] == 0x45)) {
-		playerAddress -= 8;
-		readFromMemory(fd, playerAddress, 4, bytes);
-		++i;
+	unsigned long playerAddress = personAddress - PLAYER_OFFSET_PERSON;
+	readFromMemory(fd, playerAddress, 5, bytes);
+	while (bytes[3] != 0x45 || bytes[4] != 0x01) {
+		playerAddress -= 16;
+		readFromMemory(fd, playerAddress, 5, bytes);
 	}
 	Player player = getPlayer(fd, personAddress, playerAddress, getDate(fd));
 	Club club = getClubFromPerson(fd, player.personAddress);

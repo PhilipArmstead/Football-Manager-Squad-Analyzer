@@ -41,8 +41,8 @@ void addToTeamList(const int fd, TeamList *teamList) {
 
 void addToClubList(const int fd, Club *watchedClub, const Club club) {
 	watchedClub->address = club.address;
-	strncpy(watchedClub->name, club.name, 32);
 	watchedClub->teamList = club.teamList;
+	strncpy(watchedClub->name, club.name, 32);
 
 	u8 bytes[4];
 	// TODO: add offset to constants header file
@@ -95,11 +95,16 @@ PlayerList getPlayersFromTeamList(const int fd, const TeamList *teamList, const 
 
 		unsigned long address = teamList->teams[i].address;
 		for (u8 j = 0; j < teamList->teams[i].playerCount; ++j) {
-			u8 pointer[4];
-			readFromMemory(fd, address, 4, pointer);
+			u8 bytes[5];
+			readFromMemory(fd, address, 4, bytes);
 			address += 0x08;
-			const unsigned long personAddress = hexBytesToInt(pointer, 4);
-			const unsigned long playerAddress = personAddress + PLAYER_OFFSET_PERSON;
+			const unsigned long playerAddress = hexBytesToInt(bytes, 4);
+			unsigned long personAddress = playerAddress + PLAYER_OFFSET_PERSON;
+			readFromMemory(fd, personAddress, 5, bytes);
+			while (bytes[3] != 0x45 || bytes[4] != 0x01 || readByte(fd, personAddress + 0x14)) {
+				personAddress += 16;
+				readFromMemory(fd, personAddress, 5, bytes);
+			}
 
 			playerList.player[playerIndex] = getPlayer(fd, personAddress, playerAddress, date);
 			++playerIndex;
