@@ -19,10 +19,10 @@ void showTeamList(const int fd, const TeamList *teamList, const u8 indexList[5])
 	free(playerList.player);
 }
 
-// TODO: this doesn't work with free agents
 void showPlayerScreen(const int fd, Club *watchedClub) {
 	u8 bytes[5];
-	readFromMemory(fd, POINTER_TO_CURRENT_PERSON, 4, bytes);
+	readFromMemory(fd, POINTER_TO_CURRENT_PERSON_ADDRESS, 4, bytes);
+	readFromMemory(fd, hexBytesToInt(bytes, 4), 4, bytes);
 	const unsigned long personAddress = hexBytesToInt(bytes, 4);
 	unsigned long playerAddress = personAddress - PLAYER_OFFSET_PERSON;
 	readFromMemory(fd, playerAddress, 5, bytes);
