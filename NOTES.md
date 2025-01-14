@@ -15,7 +15,9 @@ From the "current screen" static address (0x13FFF0000 on Windows and 0x15DCD9415
 - 0x08 = Row ID
 - 0x0C = Unique ID
 - 0x10 = Random ID
-- 0x44= Date of birth (2 bytes for day of the year, 2 bytes for year)
+- 0x44 = Date of birth (2 bytes for day of the year, 2 bytes for year)
+- 0x58 = Forename pointer (+0x04 from here)
+- 0x60 = Surname pointer (+0x04 from here)
 - 0x78 = Adaptability
 - 0x79 = Ambition
 - 0x7A = Loyalty

@@ -39,19 +39,19 @@ void addToTeamList(const int fd, TeamList *teamList) {
 	++teamList->length;
 }
 
-void addToClubList(const int fd, Club *watchedClub, const Club club) {
-	watchedClub->address = club.address;
-	watchedClub->teamList = club.teamList;
-	strncpy(watchedClub->name, club.name, 32);
+void addToClubList(const int fd, Club *watchedClub, const Club *club) {
+	watchedClub->address = club->address;
+	watchedClub->teamList = (TeamList){0};
+	strncpy(watchedClub->name, club->name, 32);
 
 	u8 bytes[4];
 	// TODO: add offset to constants header file
-	readFromMemory(fd, club.address + 0x18, 4, bytes);
+	readFromMemory(fd, club->address + 0x18, 4, bytes);
 	unsigned long squadListAddress = hexBytesToInt(bytes, 4);
 	readFromMemory(fd, squadListAddress, 4, bytes);
 	unsigned long teamAddress = hexBytesToInt(bytes, 4);
 
-	while (teamAddress) {
+	while (teamAddress > 255) {
 		readFromMemory(fd, teamAddress + 0x38, 4, bytes);
 		const unsigned long playerStartAddress = hexBytesToInt(bytes, 4);
 

@@ -70,7 +70,7 @@ void showPlayerScreen(const int fd, Club *watchedClub) {
 				if (watchedClub->address == club.address) {
 					watchedClub->address = 0;
 				} else {
-					addToClubList(fd, watchedClub, club);
+					addToClubList(fd, watchedClub, &club);
 				}
 
 				isWaiting = false;
