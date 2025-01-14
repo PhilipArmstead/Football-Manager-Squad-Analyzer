@@ -18,7 +18,7 @@ typedef struct {
 	u8 surname[32];
 	u8 personality[8];
 	u8 attributes[56];
-	u8 positions[56];
+	u8 positions[15];
 	bool canDevelopQuickly;
 	bool isHotProspect;
 	unsigned int guideValue;

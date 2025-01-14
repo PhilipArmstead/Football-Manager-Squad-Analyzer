@@ -120,22 +120,14 @@ void showPlayerList(const int fd, const PlayerList playerList) {
 		printf(" %3d ", p->age);
 		printf(" %3d/%3d ", p->ca, p->pa);
 
-		u8 attributes[56];
-		readFromMemory(fd, p->personAddress + PLAYER_OFFSET_ATTRIBUTES, 54, attributes);
-		u8 personality[8];
-		readFromMemory(fd, p->personAddress + OFFSET_PERSONALITY, 8, personality);
-
 		const char fastLearnerString = p->canDevelopQuickly ? 'Q' : ' ';
 		const char hotProspectString = p->isHotProspect ? 'H' : ' ';
 		printf(" %c%c ", hotProspectString, fastLearnerString);
 
-		u8 positions[15];
-		readFromMemory(fd, p->playerAddress + PLAYER_OFFSET_POSITIONS, 15, positions);
-
 		for (u8 j = 0; j < ROLE_COUNT; ++j) {
-			const short familiarity = positions[roles[j].positionIndex];
+			const short familiarity = p->positions[roles[j].positionIndex];
 			if (familiarity >= 10) {
-				double raw = calculateRoleScores(attributes, roles[j].weights);
+				double raw = calculateRoleScores(p->attributes, roles[j].weights);
 				raw -= raw * 0.025 * (20 - familiarity);
 				char s[8];
 				sprintf(s, "%.4g%%", raw);
