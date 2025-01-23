@@ -40,7 +40,7 @@ static inline void showClubPrompt(const int fd, const Club *watchedClub) {
 
 	printf("Press enter when you're finished adding.\n");
 
-	char buffer[6];
+	u8 buffer[6];
 	u8 i = 0;
 	while (i < 6 && read(STDIN_FILENO, &buffer[i], 1) > 0) {
 		if (buffer[i] == '\n') {

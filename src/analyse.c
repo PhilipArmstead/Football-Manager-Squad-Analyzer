@@ -21,9 +21,24 @@ void showTeamList(const int fd, const TeamList *teamList, const u8 indexList[5])
 
 void showPlayerScreen(const int fd, Club *watchedClub) {
 	u8 bytes[5];
-	readFromMemory(fd, POINTER_TO_CURRENT_PERSON_ADDRESS, 4, bytes);
-	readFromMemory(fd, hexBytesToInt(bytes, 4), 4, bytes);
-	const unsigned long personAddress = hexBytesToInt(bytes, 4);
+	readFromMemory(fd, POINTER_TO_CURRENT_PERSON, 4, bytes);
+	unsigned long personAddress = hexBytesToInt(bytes, 4);
+
+	u8 idBytes[8];
+	readFromMemory(fd, personAddress + OFFSET_ID, 8, idBytes);
+
+	if (
+		!idBytes[3] ||
+		idBytes[0] != idBytes[4] ||
+		idBytes[1] != idBytes[5] ||
+		idBytes[2] != idBytes[6] ||
+		idBytes[3] != idBytes[7]
+	) {
+		readFromMemory(fd, POINTER_TO_CURRENT_PERSON_ADDRESS, 4, bytes);
+		readFromMemory(fd, hexBytesToInt(bytes, 4), 4, bytes);
+		personAddress = hexBytesToInt(bytes, 4);
+	}
+
 	unsigned long playerAddress = personAddress - PLAYER_OFFSET_PERSON;
 	readFromMemory(fd, playerAddress, 5, bytes);
 	while (bytes[3] != 0x45 || bytes[4] != 0x01) {
@@ -84,8 +99,6 @@ void showPlayerScreen(const int fd, Club *watchedClub) {
 void printPlayer(const Player *p) {
 	char *fastLearnerString = p->canDevelopQuickly ? "Fast learner  " : "";
 	char *hotProspectString = p->isHotProspect ? "Hot prospect  " : "";
-
-	printf("\n\n\n\n\n\n\n\n");
 
 	printf(".------------------------------------------.------------------------------------------.\n");
 	printf("| %s %s (%d yrs): ", p->forename, p->surname, p->age);

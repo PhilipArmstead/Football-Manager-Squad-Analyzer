@@ -16,7 +16,7 @@ Club getClubFromPerson(const int fd, const unsigned long personAddress) {
 	readFromMemory(fd, teamsAddress + 0xC0, 4, pointer);
 	const unsigned long longNameAddress = hexBytesToInt(pointer, 4);
 
-	Club club = {teamsAddress, 0};
+	Club club = {teamsAddress};
 	readFromMemory(fd, longNameAddress + 0x04, 32, club.name);
 
 	return club;

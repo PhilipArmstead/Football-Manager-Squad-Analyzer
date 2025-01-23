@@ -63,7 +63,7 @@ void addToClubList(const int fd, Club *watchedClub, const Club *club) {
 			readFromMemory(fd, teamAddress + 0x28, 1, &teamType);
 			watchedClub->teamList.teams[watchedClub->teamList.length++] = (Team){
 				playerStartAddress,
-				playerEndAddress - playerStartAddress >> 3,
+				(playerEndAddress - playerStartAddress) >> 3,
 				teamType
 			};
 		}
