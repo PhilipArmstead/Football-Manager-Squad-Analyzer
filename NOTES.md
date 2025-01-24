@@ -16,6 +16,7 @@ From the "current screen" static address (0x13FFF0000 on Windows and 0x15DCD9415
 - 0x0C = Unique ID
 - 0x10 = Random ID
 - 0x44 = Date of birth (2 bytes for day of the year, 2 bytes for year)
+- 0x48 = Full name pointer (+0x04 from here)
 - 0x58 = Forename pointer (+0x04 from here)
 - 0x60 = Surname pointer (+0x04 from here)
 - 0x78 = Adaptability
@@ -26,22 +27,30 @@ From the "current screen" static address (0x13FFF0000 on Windows and 0x15DCD9415
 - 0x7D = Sportsmanship
 - 0x7E = Temperament
 - 0x7F = Controversy
+- 0x80 = Relationship start/end pointer (0x00 from here is start, 0x08 from here is end)
 - 0xC8 = Contract pointer
 
 ## Mapping player
 
-- Guide value is +0x1D0
-- Transfer value is +0x1D4
-- Sharpness is +0x1F4 (2 bytes)
-- Fatigue is +0x1F6 (signed 2 bytes (0 is best))
-- Condition is +0x1F8 (2 bytes)
-- Home reputation is +0x1FA (2 bytes)
-- Current reputation is +0x1FC (2 bytes)
-- World reputation is +0x1FE (2 bytes)
-- CA is +0x200
-- PA is +0x202
-- Preferred position is +0x266 (1=right,2=left,3=right/central,4=left/central,5=central,6=right when 2,right/central)
-- 0x328 is a function call run when jadedness changes?
+- 0xF8 = Injury start/end pointer (0x00 from here is start, 0x08 from here is end)
+- 0x1D0 = Guide value
+- 0x1D4 = Transfer value
+- 0x1F4 = Sharpness
+- 0x1F6 = Fatigue (0 is best)
+- 0x1F8 = Condition
+- 0x1FA = Home reputation
+- 0x1FC = Current reputation
+- 0x1FE = World reputation
+- 0x200 = Current ability
+- 0x202 = Potential ability
+- 0x266 = Preferred position
+	- 0x01 = right
+	- 0x02 = left
+	- 0x03 = right/central
+	- 0x04 = left/central
+	- 0x05 = central
+	- 0x06 = right when 2, right/central
+- 0x328 = function call run when jadedness changes?
 
 ## Mapping staff
 
@@ -191,6 +200,36 @@ The whole object is 0xB8 bytes long
 - -0x2E = Determination
 - -0x2D = Composure
 - -0x2C = Concentration
+
+## Mapping relationships
+
+These offsets are for each individual relationship
+
+- 0x00 = relationship target (club or person) (if applicable)
+- 0x09 = person type (if relationship is about with a person)
+	- 0x00 = None
+	- 0x01 = parent
+	- 0x02 = sibling
+	- 0x03 = child
+	- 0x04 = relation
+	- 0x05 = teammate
+	- 0x06 = manager
+	- 0x07 = player
+	- 0x08 = backroom staff
+	- 0x09 = idol
+	- 0x0A = friend
+	- 0x0B = youth staff
+- 0x0B = ??
+- 0x0C = type
+	- 0x01 = likes person
+	- 0x02 = dislikes person
+	- 0x03 = likes team
+	- 0x04 = dislikes team
+	- 0x09 = other nationality
+	- 0x0A = international retirement
+	- 0x48 = training happiness
+	- 0x48 = formed at club
+- 0x0D = relationship value (if applicable)
 
 ## Date & time
 
