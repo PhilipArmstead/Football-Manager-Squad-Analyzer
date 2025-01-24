@@ -6,7 +6,6 @@
 #include "analyse.h"
 #include "club.h"
 #include "types.h"
-#include "watch-list.h"
 #include "wonderkid.h"
 
 
@@ -35,7 +34,6 @@ int main() {
 	while (1) {
 		printf("\n");
 		printf("show current (p)layer\n");
-		printf("show current (t)eam\n");
 		if (watchedClub.address) {
 			printf("(l)ist %s squads\n", watchedClub.name);
 		}
@@ -63,12 +61,6 @@ int main() {
 			}
 			case 'p': {
 				showPlayerScreen(fd, &watchedClub);
-				break;
-			}
-			case 't': {
-				TeamList tmp = {0};
-				addToTeamList(fd, &tmp);
-				showTeamList(fd, &tmp, (u8*){0});
 				break;
 			}
 			default:
