@@ -55,6 +55,7 @@ void showPlayerScreen(const int fd, Club *watchedClub) {
 		u8 c = '\n';
 		if (isPlayerValid(fd, player.personAddress, player.playerAddress)) {
 			printf("\nMake (w)onderkid\n");
+			printf("Fully (h)eal\n");
 			printf("(d)estroy player\n");
 			if (watchedClub->address == club.address) {
 				printf("Un-watch %s (s)quads\n", club.name);
@@ -76,6 +77,9 @@ void showPlayerScreen(const int fd, Club *watchedClub) {
 			case 'w':
 				makeWonderkid(fd, player.personAddress, player.playerAddress);
 				player = getPlayer(fd, player.personAddress, player.playerAddress, getDate(fd));
+				break;
+			case 'h':
+				healPlayer(fd, player.playerAddress);
 				break;
 			case 'd':
 				destroyPlayer(fd, player.personAddress, player.playerAddress);

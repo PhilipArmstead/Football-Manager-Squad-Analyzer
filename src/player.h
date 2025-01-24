@@ -10,6 +10,7 @@
 
 Player getPlayer(int fd, unsigned long peronAddress, unsigned long playerAddress, Date date);
 bool isPlayerValid(int fd, unsigned long peronAddress, unsigned long playerAddress);
+void healPlayer(int fd, unsigned long playerAddress);
 void showPlayerList(int fd, PlayerList playerList);
 
 static inline void makeWonderkid(const int fd, const unsigned long personAddress, const unsigned long playerAddress) {

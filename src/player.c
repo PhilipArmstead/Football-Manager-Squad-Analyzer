@@ -85,6 +85,16 @@ bool isPlayerValid(const int fd, const unsigned long personAddress, const unsign
 	return true;
 }
 
+void healPlayer(const int fd, const unsigned long playerAddress) {
+	u8 bytes[4];
+	readFromMemory(fd, playerAddress + PLAYER_OFFSET_INJURY_POINTER, 4, bytes);
+	const unsigned long injuryAddress = hexBytesToInt(bytes, 4);
+	writeToMemory(fd, injuryAddress, 16, (u8[]){0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
+
+	// Set sharpness to 10,000, fatigue to 0 and condition to 10,000
+	writeToMemory(fd, playerAddress + PLAYER_OFFSET_SHARPNESS, 6, (u8[]){0x10, 0x27, 0, 0, 0x10, 0x27});
+}
+
 // TODO: add option to sort by columns
 void showPlayerList(const int fd, const PlayerList playerList) {
 	u8 longestName = 0;
