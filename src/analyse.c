@@ -127,14 +127,12 @@ void printPlayer(const Player *p) {
 
 	u8 c = 0;
 	for (u8 i = 0; i < ROLE_COUNT; ++i) {
-		const short familiarity = p->positions[roles[i].positionIndex];
-		if (familiarity >= 10) {
-			double raw = calculateRoleScores(p->attributes, roles[i].weights);
-			raw -= raw * 0.025 * (20 - familiarity);
+		const float rating = p->roles[i];
+		if (rating) {
 			if (!i) {
-				printf("| %s: %.4g%% ", roles[i].name, raw);
+				printf("| %s: %.4g%% ", roles[i].name, rating);
 			} else {
-				printf("| %-9s: %.4g%% ", roles[i].name, raw);
+				printf("| %-9s: %.4g%% ", roles[i].name, rating);
 			}
 			++c;
 		}
@@ -144,15 +142,4 @@ void printPlayer(const Player *p) {
 			c = 0;
 		}
 	}
-}
-
-float calculateRoleScores(const u8 attributes[54], const u8 weights[54]) {
-	float totalScore = 0;
-	float totalWeight = 0;
-	for (u8 i = 0; i < 54; ++i) {
-		totalScore += (float)(attributes[i] * weights[i]);
-		totalWeight += (float)weights[i];
-	}
-
-	return totalWeight ? totalScore / totalWeight : 0;
 }

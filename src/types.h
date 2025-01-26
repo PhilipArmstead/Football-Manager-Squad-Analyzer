@@ -1,11 +1,14 @@
 #pragma once
 
+
 typedef unsigned char bool;
 typedef unsigned char u8;
 typedef unsigned short u16;
 
 #define false 0
 #define true 1
+
+#define ROLE_COUNT 12
 
 typedef struct {
 	unsigned long personAddress;
@@ -19,6 +22,7 @@ typedef struct {
 	u8 personality[8];
 	u8 attributes[56];
 	u8 positions[15];
+	float roles[ROLE_COUNT];
 	bool canDevelopQuickly;
 	bool isHotProspect;
 	unsigned int guideValue;

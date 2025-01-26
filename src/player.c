@@ -47,6 +47,17 @@ Player getPlayer(const int fd, const unsigned long peronAddress, const unsigned 
 	readFromMemory(fd, playerAddress + PLAYER_OFFSET_ATTRIBUTES, 54, player.attributes);
 	readFromMemory(fd, playerAddress + PLAYER_OFFSET_POSITIONS, 15, player.positions);
 
+    for (u8 j = 0; j < ROLE_COUNT; ++j) {
+        const short familiarity = player.positions[roles[j].positionIndex];
+        if (familiarity >= 10) {
+            float raw = calculateRoleScores(player.attributes, roles[j].weights);
+            raw -= raw * 0.025 * (20 - familiarity);
+            player.roles[j] = raw;
+        } else {
+            player.roles[j] = 0;
+        }
+    }
+
 	player.canDevelopQuickly = player.age <= 23 &&
 		player.attributes[ATTRIBUTES_INJURY_PRONENESS] < 70 &&
 		player.personality[PERSONALITY_AMBITION] > 10 &&
@@ -135,12 +146,10 @@ void showPlayerList(const int fd, const PlayerList playerList) {
 		printf(" %c%c ", hotProspectString, fastLearnerString);
 
 		for (u8 j = 0; j < ROLE_COUNT; ++j) {
-			const short familiarity = p->positions[roles[j].positionIndex];
-			if (familiarity >= 10) {
-				double raw = calculateRoleScores(p->attributes, roles[j].weights);
-				raw -= raw * 0.025 * (20 - familiarity);
+			const float rating = p->roles[j];
+			if (rating) {
 				char s[8];
-				sprintf(s, "%.4g%%", raw);
+				sprintf(s, "%.4g%%", rating);
 				printf("| %-6s ", s);
 				for (u8 k = 6; k < roles[j].nameLength; ++k) {
 					printf(" ");
