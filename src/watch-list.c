@@ -20,7 +20,7 @@ void addToClubList(const int fd, Club *watchedClub, const Club *club) {
 	readFromMemory(fd, squadListAddress, 4, bytes);
 	unsigned long teamAddress = hexBytesToInt(bytes, 4);
 
-	while (teamAddress > 255) {
+	while (teamAddress > 255 && teamAddress < 0x80000000) {
 		readFromMemory(fd, teamAddress + 0x38, 4, bytes);
 		const unsigned long playerStartAddress = hexBytesToInt(bytes, 4);
 
