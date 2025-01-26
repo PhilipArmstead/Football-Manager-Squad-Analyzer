@@ -23,6 +23,9 @@ static inline void showClubPrompt(const int fd, const Club *watchedClub) {
 			case 1:
 				printf(" reserves");
 				break;
+			case 10:
+				printf(" U21s");
+				break;
 			case 12:
 				printf(" U18s");
 				break;
