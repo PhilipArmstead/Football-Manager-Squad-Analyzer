@@ -5,7 +5,7 @@
 #include <unistd.h>
 
 #include "player.h"
-#include "types.h"
+#include "sort.h"
 #include "watch-list.h"
 
 
@@ -57,24 +57,109 @@ static inline void showClubPrompt(const int fd, const Club *watchedClub) {
 		buffer[j] -= 49;
 	}
 	const PlayerList playerList = getPlayersFromTeamList(fd, &watchedClub->teamList, buffer);
-	showPlayerList(fd, playerList);
 
-	// Prompt user again to export list of heal the team
-	u8 c = '\n';
-	printf("\nFully (h)eal team\n");
-	printf("Press anything else to return\n");
-	c = getchar();
+	bool isRunning = true;
+	while (isRunning) {
+		showPlayerList(fd, playerList);
 
-	const u8 a = c;
-
-	// swallow newline
-	while (c != '\n') {
+		// Prompt user again to export list of heal the team
+		u8 c = '\n';
+		printf("\nFully (h)eal team\n");
+		printf("(s)ort players\n");
+		printf("Press anything else to return\n");
 		c = getchar();
-	}
 
-	if (a == 'h') {
-		for (u8 j = 0; j < playerList.playerCount; ++j) {
-			healPlayer(fd, playerList.player[j].playerAddress);
+		const u8 a = c;
+
+		// swallow newline
+		while (c != '\n') {
+			c = getchar();
+		}
+
+		switch (a) {
+			case 'h': {
+				for (u8 j = 0; j < playerList.playerCount; ++j) {
+					healPlayer(fd, playerList.player[j].playerAddress);
+				}
+				isRunning = false;
+				break;
+			}
+			case 's': {
+				printf("\nSelect sort criteria:\n");
+				printf("1: age\n");
+				printf("2: current ability\n");
+				printf("3: potential ability\n");
+				printf("4-15: roles\n");
+
+				u8 buf[3];
+				u8 j = 0;
+				while (j < 3 && read(STDIN_FILENO, &buf[j], 1) > 0) {
+					if (buf[j] == '\n') {
+						break;
+					}
+					++j;
+				}
+
+				if (!j) {
+					return;
+				}
+
+				bool (*compare)(Player, Player);
+				switch (strtol(buf, NULL, 10)) {
+					case 1:
+						compare = sortByAge;
+						break;
+					case 2:
+						compare = sortByCurrentAbility;
+						break;
+					case 3:
+						compare = sortByPotentialAbility;
+						break;
+					case 4:
+						compare = sortByRoleGoalkeeper;
+						break;
+					case 5:
+						compare = sortByRoleDefenderLeft;
+						break;
+					case 6:
+						compare = sortByRoleDefenderCentre;
+						break;
+					case 7:
+						compare = sortByRoleDefenderRight;
+						break;
+					case 8:
+						compare = sortByRoleDefensiveMidfielder;
+						break;
+					case 9:
+						compare = sortByRoleAttackingMidfielderLeftAttack;
+						break;
+					case 10:
+						compare = sortByRoleAttackingMidfielderLeftSupport;
+						break;
+					case 11:
+						compare = sortByRoleAttackingMidfielderCentre;
+						break;
+					case 12:
+						compare = sortByRoleAttackingMidfielderRightAttack;
+						break;
+					case 13:
+						compare = sortByRoleAttackingMidfielderRightSupport;
+						break;
+					case 14:
+						compare = sortByRoleStrikerAttackingForward;
+						break;
+					case 15:
+						compare = sortByRoleStrikerPressingForward;
+						break;
+					default:
+						compare = sortByAge;
+				}
+				quickSort(playerList.player, 0, playerList.playerCount - 1, compare);
+				break;
+			}
+			default: {
+				isRunning = false;
+			}
 		}
 	}
 

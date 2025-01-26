@@ -47,16 +47,16 @@ Player getPlayer(const int fd, const unsigned long peronAddress, const unsigned 
 	readFromMemory(fd, playerAddress + PLAYER_OFFSET_ATTRIBUTES, 54, player.attributes);
 	readFromMemory(fd, playerAddress + PLAYER_OFFSET_POSITIONS, 15, player.positions);
 
-    for (u8 j = 0; j < ROLE_COUNT; ++j) {
-        const short familiarity = player.positions[roles[j].positionIndex];
-        if (familiarity >= 10) {
-            float raw = calculateRoleScores(player.attributes, roles[j].weights);
-            raw -= raw * 0.025 * (20 - familiarity);
-            player.roles[j] = raw;
-        } else {
-            player.roles[j] = 0;
-        }
-    }
+	for (u8 j = 0; j < ROLE_COUNT; ++j) {
+		const short familiarity = player.positions[roles[j].positionIndex];
+		if (familiarity >= 10) {
+			float raw = calculateRoleScores(player.attributes, roles[j].weights);
+			raw -= raw * 0.025 * (20 - familiarity);
+			player.roles[j] = raw;
+		} else {
+			player.roles[j] = 0;
+		}
+	}
 
 	player.canDevelopQuickly = player.age <= 23 &&
 		player.attributes[ATTRIBUTES_INJURY_PRONENESS] < 70 &&
@@ -106,7 +106,6 @@ void healPlayer(const int fd, const unsigned long playerAddress) {
 	writeToMemory(fd, playerAddress + PLAYER_OFFSET_SHARPNESS, 6, (u8[]){0x10, 0x27, 0, 0, 0x10, 0x27});
 }
 
-// TODO: add option to sort by columns
 void showPlayerList(const int fd, const PlayerList playerList) {
 	u8 longestName = 0;
 	for (unsigned int i = 0; i < playerList.playerCount; ++i) {

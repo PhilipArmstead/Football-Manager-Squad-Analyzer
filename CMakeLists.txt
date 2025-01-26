@@ -19,6 +19,7 @@ add_executable(
 	src/club.c
 	src/date-time.c
 	src/player.c
+	src/sort.c
 	src/strings.c
 	src/watch-list.c
 	src/wonderkid.c
