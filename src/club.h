@@ -1,12 +1,12 @@
 #pragma once
 
-#include <analyse.h>
-#include <memory.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 
+#include "player.h"
 #include "types.h"
+#include "watch-list.h"
 
 
 Club getClubFromPerson(int fd, unsigned long personAddress);
@@ -49,10 +49,34 @@ static inline void showClubPrompt(const int fd, const Club *watchedClub) {
 		++i;
 	}
 
-	if (i) {
-		for (u8 j = 0; j < i; ++j) {
-			buffer[j] -= 49;
-		}
-		showTeamList(fd, &watchedClub->teamList, buffer);
+	if (!i) {
+		return;
 	}
+
+	for (u8 j = 0; j < i; ++j) {
+		buffer[j] -= 49;
+	}
+	const PlayerList playerList = getPlayersFromTeamList(fd, &watchedClub->teamList, buffer);
+	showPlayerList(fd, playerList);
+
+	// Prompt user again to export list of heal the team
+	u8 c = '\n';
+	printf("\nFully (h)eal team\n");
+	printf("Press anything else to return\n");
+	c = getchar();
+
+	const u8 a = c;
+
+	// swallow newline
+	while (c != '\n') {
+		c = getchar();
+	}
+
+	if (a == 'h') {
+		for (u8 j = 0; j < playerList.playerCount; ++j) {
+			healPlayer(fd, playerList.player[j].playerAddress);
+		}
+	}
+
+	free(playerList.player);
 }

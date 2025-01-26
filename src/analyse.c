@@ -13,12 +13,6 @@
 
 extern const Role roles[ROLE_COUNT];
 
-void showTeamList(const int fd, const TeamList *teamList, const u8 indexList[5]) {
-	const PlayerList playerList = getPlayersFromTeamList(fd, teamList, indexList);
-	showPlayerList(fd, playerList);
-	free(playerList.player);
-}
-
 void showPlayerScreen(const int fd, Club *watchedClub) {
 	u8 bytes[5];
 	readFromMemory(fd, POINTER_TO_CURRENT_PERSON, 4, bytes);
